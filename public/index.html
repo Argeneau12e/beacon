@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BEACON — Bitget Strategy Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ── TOKENS ──────────────────────────────────────────────── */
+    :root {
+      --bg:           #09090c;
+      --bg-card:      rgba(255, 255, 255, 0.032);
+      --bg-card-hover:rgba(255, 255, 255, 0.055);
+      --border:       rgba(255, 255, 255, 0.07);
+      --border-amber: rgba(245, 158, 11, 0.3);
+      --text:         #f0ede8;
+      --text-muted:   #7a756d;
+      --text-dim:     #3f3c38;
+      --amber:        #f59e0b;
+      --amber-dim:    rgba(245, 158, 11, 0.12);
+      --green:        #10b981;
+      --green-dim:    rgba(16, 185, 129, 0.12);
+      --red:          #f43f5e;
+      --red-dim:      rgba(244, 63, 94, 0.12);
+      --yellow:       #eab308;
+      --yellow-dim:   rgba(234, 179, 8, 0.12);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+      --radius:       14px;
+      --radius-sm:    8px;
+      --circ:         502.65; /* 2 * pi * 80 */
+    }
+
+    /* ── RESET ───────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── CANVAS BACKGROUND (DCA_Claw neural net aesthetic) ──── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────────────── */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .logo-block { display: flex; flex-direction: column; gap: 4px; }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 2.6rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: var(--text);
+      line-height: 1;
+    }
+    .logo span { color: var(--amber); }
+    .logo-sub {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .header-controls { display: flex; align-items: center; gap: 10px; }
+    select, button {
+      font-family: var(--font-body);
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    select {
+      padding: 8px 14px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a756d' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 32px;
+    }
+    select:focus { outline: none; border-color: var(--amber); }
+    .btn-refresh {
+      padding: 8px 18px;
+      border-color: var(--border-amber);
+      color: var(--amber);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-refresh:hover { background: var(--amber-dim); border-color: var(--amber); }
+    .btn-refresh.loading { opacity: 0.5; pointer-events: none; }
+    .spin { display: inline-block; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SECTION LABEL ───────────────────────────────────────── */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── MAIN GRID: signals left, score right ────────────────── */
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: start;
+    }
+    @media (max-width: 780px) {
+      .top-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── SIGNAL CARDS ────────────────────────────────────────── */
+    .signals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 480px) {
+      .signals-grid { grid-template-columns: 1fr; }
+    }
+
+    .signal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .signal-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 2px 2px 0 0;
+      background: var(--card-accent, var(--text-dim));
+      transition: background 0.4s;
+    }
+    .signal-card.bullish { --card-accent: var(--green); border-color: rgba(16,185,129,0.2); }
+    .signal-card.bearish { --card-accent: var(--red);   border-color: rgba(244,63,94,0.2); }
+    .signal-card.neutral { --card-accent: var(--amber); border-color: rgba(245,158,11,0.15); }
+    .signal-card.loading-state { --card-accent: var(--text-dim); }
+
+    .card-icon {
+      width: 28px; height: 28px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+    .card-name {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .card-value {
+      font-family: var(--font-mono);
+      font-size: 1.7rem;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 8px;
+      transition: color 0.3s;
+    }
+    .signal-card.bullish .card-value { color: var(--green); }
+    .signal-card.bearish .card-value { color: var(--red); }
+    .signal-card.neutral .card-value { color: var(--amber); }
+
+    .card-status {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+    .signal-card.bullish .card-status { color: var(--green); }
+    .signal-card.bearish .card-status { color: var(--red); }
+    .signal-card.neutral .card-status { color: var(--amber); }
+    .signal-card.loading-state .card-status { color: var(--text-dim); }
+
+    .card-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    /* skeleton pulse */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 25%, rgba(255,255,255,0.06) 50%, var(--bg-card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+      height: 1em;
+      width: 60%;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── SCORE GAUGE ─────────────────────────────────────────── */
+    .score-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .score-title {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .gauge-wrap { position: relative; width: 180px; height: 180px; }
+    .gauge-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.06);
+      stroke-width: 10;
+    }
+    .gauge-ring {
+      fill: none;
+      stroke: var(--amber);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 0 502.65;
+      transition: stroke-dasharray 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s;
+    }
+    .gauge-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #score-number {
+      font-family: var(--font-mono);
+      font-size: 3rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--text);
+      transition: color 0.5s;
+    }
+    #score-number.high { color: var(--green); }
+    #score-number.mid  { color: var(--amber); }
+    #score-number.low  { color: var(--red); }
+    .score-sub {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      margin-top: 2px;
+    }
+    #score-label {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-align: center;
+    }
+    #score-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+      max-width: 220px;
+    }
+    .last-updated {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    /* ── GLASS CARD (generic) ────────────────────────────────── */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .glass-card-title {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.58rem;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+    }
+    .badge-amber {
+      background: var(--amber-dim);
+      color: var(--amber);
+      border: 1px solid rgba(245,158,11,0.2);
+    }
+    .badge-green {
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+
+    /* ── AI ADVISOR ──────────────────────────────────────────── */
+    #ai-text {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    #ai-text.loading-text { color: var(--text-muted); font-style: italic; }
+    .playbook-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--amber-dim);
+      border: 1px solid var(--border-amber);
+      border-radius: var(--radius-sm);
+    }
+    .playbook-label {
+      font-family: var(--font-mono);
+      font-size: 0.63rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    #playbook-type {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--amber);
+    }
+    .playbook-arrow {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--amber);
+    }
+
+    /* ── BACKTEST SECTION ────────────────────────────────────── */
+    .backtest-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .backtest-controls select { width: auto; }
+    .btn-run {
+      padding: 8px 20px;
+      background: var(--amber);
+      color: #0a0909;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.03em;
+      transition: opacity 0.2s;
+    }
+    .btn-run:hover { opacity: 0.85; }
+    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .backtest-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 600px) {
+      .backtest-stats { grid-template-columns: 1fr 1fr; }
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-name {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .stat-val {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 400;
+    }
+    .stat-val.positive { color: var(--green); }
+    .stat-val.negative { color: var(--red); }
+    .stat-val.amber    { color: var(--amber); }
+    .stat-val.plain-col { color: #f59e0b; }
+    .stat-val.smart-col { color: var(--green); }
+
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+      margin-bottom: 12px;
+    }
+    #backtest-chart { width: 100% !important; height: 100% !important; }
+
+    .chart-legend {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ── HOW TO USE ──────────────────────────────────────────── */
+    .playbook-guide {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .playbook-guide { grid-template-columns: 1fr; }
+    }
+    .guide-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .guide-type {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .guide-type.dca   { color: var(--green); }
+    .guide-type.grid  { color: var(--amber); }
+    .guide-type.trend { color: #818cf8; }
+    .guide-score-range {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .guide-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .footer-sub {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+    }
+    .footer-links {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--amber); }
+
+    /* ── DIVIDER ─────────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Animated background canvas (DCA_Claw visual DNA) -->
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="app">
+
+    <!-- ── HEADER ─────────────────────────────────────────── -->
+    <header>
+      <div class="logo-block">
+        <div class="logo">BE<span>A</span>CON</div>
+        <div class="logo-sub">Bitget Strategy Intelligence &nbsp;/&nbsp; AI Hackathon S1</div>
+      </div>
+      <div class="header-controls">
+        <select id="pair-select" onchange="handlePairChange(this.value)">
+          <option value="BTCUSDT">BTC / USDT</option>
+          <option value="ETHUSDT">ETH / USDT</option>
+          <option value="SOLUSDT">SOL / USDT</option>
+          <option value="BNBUSDT">BNB / USDT</option>
+          <option value="XRPUSDT">XRP / USDT</option>
+        </select>
+        <button class="btn-refresh" id="refresh-btn" onclick="loadAll()">
+          <svg class="spin" style="display:none" id="spin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <svg id="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- ── SIGNAL PANEL + SCORE ───────────────────────────── -->
+    <div class="section-label">Live Market Signals</div>
+    <div class="top-grid">
+
+      <!-- 4 Signal Cards -->
+      <div class="signals-grid">
+
+        <!-- RSI -->
+        <div class="signal-card loading-state" id="rsi-card">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <div class="card-name">RSI (14-Day)</div>
+          <div class="card-value" id="rsi-value"><span class="skeleton">&nbsp;</span></div>
+          <div class="card-status" id="rsi-status">Loading...</div>
+          <div class="card-desc" id="rsi-desc">Momentum indicator. Below 30 = oversold entry zone.</div>
+        </div>
+
+        <!-- Funding Rate -->
+        <div class="signal-card loading-state" id="funding-card">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>
+          </svg>
+          <div class="card-name">Funding Rate</div>
+          <div class="card-value" id="funding-value"><span class="skeleton">&nbsp;</span></div>
+          <div class="card-status" id="funding-status">Loading...</div>
+          <div class="card-desc" id="funding-desc">Futures positioning. Negative = bears paying longs.</div>
+        </div>
+
+        <!-- Fear & Greed -->
+        <div class="signal-card loading-state" id="fg-card">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+          <div class="card-name">Fear &amp; Greed</div>
+          <div class="card-value" id="fg-value"><span class="skeleton">&nbsp;</span></div>
+          <div class="card-status" id="fg-status">Loading...</div>
+          <div class="card-desc" id="fg-desc">Market sentiment 0–100. Below 25 = historically best DCA zone.</div>
+        </div>
+
+        <!-- Open Interest -->
+        <div class="signal-card loading-state" id="oi-card">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <div class="card-name">Open Interest</div>
+          <div class="card-value" id="oi-value"><span class="skeleton">&nbsp;</span></div>
+          <div class="card-status" id="oi-status">Loading...</div>
+          <div class="card-desc" id="oi-desc">Total futures positions. Rising = new capital entering market.</div>
+        </div>
+
+      </div>
+
+      <!-- Score Gauge -->
+      <div class="score-panel">
+        <div class="score-title">DCA Entry Score</div>
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 200">
+            <circle class="gauge-bg" cx="100" cy="100" r="80"/>
+            <circle class="gauge-ring" id="gauge-ring" cx="100" cy="100" r="80"/>
+          </svg>
+          <div class="gauge-center">
+            <div id="score-number" class="mid">--</div>
+            <div class="score-sub">/ 100</div>
+          </div>
+        </div>
+        <div id="score-label" style="color: var(--text-muted)">Calculating...</div>
+        <div id="score-desc" class="score-sub" style="color:var(--text-dim); font-size:0.65rem; text-align:center; max-width:200px; line-height:1.5; margin-top:4px">
+          Combines RSI, Funding Rate,<br>Fear &amp; Greed into one signal
+        </div>
+        <div class="last-updated" id="last-updated"></div>
+      </div>
+
+    </div>
+
+    <!-- ── AI STRATEGY ADVISOR ────────────────────────────── -->
+    <div class="glass-card" style="margin-top:16px;">
+      <div class="glass-card-title">
+        AI Strategy Advisor
+        <span class="badge badge-amber">Groq AI</span>
+        <span class="badge badge-green" id="live-badge">LIVE</span>
+      </div>
+      <div id="ai-text" class="loading-text">Analyzing market signals...</div>
+      <div class="playbook-row">
+        <div>
+          <div class="playbook-label">Recommended Bitget Playbook</div>
+          <div id="playbook-type">Analyzing...</div>
+        </div>
+        <div class="playbook-arrow">Open in GetAgent &rarr;</div>
+      </div>
+    </div>
+
+    <!-- ── BACKTEST ────────────────────────────────────────── -->
+    <div class="glass-card">
+      <div class="glass-card-title">
+        Strategy Backtester
+        <span class="badge badge-amber">90-Day Simulation</span>
+      </div>
+
+      <div class="backtest-controls">
+        <select id="bt-pair">
+          <option value="BTCUSDT">BTC / USDT</option>
+          <option value="ETHUSDT">ETH / USDT</option>
+          <option value="SOLUSDT">SOL / USDT</option>
+          <option value="BNBUSDT">BNB / USDT</option>
+          <option value="XRPUSDT">XRP / USDT</option>
+        </select>
+        <select id="bt-interval">
+          <option value="7">Weekly DCA (every 7 days)</option>
+          <option value="14">Bi-weekly (every 14 days)</option>
+          <option value="30">Monthly (every 30 days)</option>
+        </select>
+        <button class="btn-run" id="run-btn" onclick="runBacktest()">Run Backtest</button>
+      </div>
+
+      <div class="backtest-stats">
+        <div class="stat-card">
+          <div class="stat-name">Plain DCA Return</div>
+          <div class="stat-val plain-col" id="plain-return">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-name">Smart DCA Return</div>
+          <div class="stat-val smart-col" id="smart-return">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-name">Plain Buys</div>
+          <div class="stat-val amber" id="plain-buys">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-name">Smart Buys</div>
+          <div class="stat-val amber" id="smart-buys">--</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="backtest-chart"></canvas>
+      </div>
+
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f59e0b"></div>
+          Plain DCA (buys every N days)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#10b981"></div>
+          Smart DCA (buys only when BEACON signals are favorable)
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLAYBOOK GUIDE ─────────────────────────────────── -->
+    <div class="glass-card">
+      <div class="glass-card-title">How to Use This with Bitget GetAgent Playbook</div>
+      <div class="playbook-guide">
+        <div class="guide-card">
+          <div class="guide-type dca">DCA Strategy</div>
+          <div class="guide-score-range">Score 60–100 &nbsp;|&nbsp; Best fit</div>
+          <div class="guide-desc">Use when Fear &amp; Greed is low and RSI is oversold. Set a recurring buy at your chosen interval directly in GetAgent Playbook. Let BEACON confirm the entry zone before starting.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-type grid">Grid Trading</div>
+          <div class="guide-score-range">Score 35–65 &nbsp;|&nbsp; Sideways markets</div>
+          <div class="guide-desc">Use when market is ranging without a clear trend. Grid strategies profit from oscillation. If RSI is between 40–60 and funding rate is near zero, a Grid Playbook is ideal.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-type trend">Trend-Following</div>
+          <div class="guide-score-range">Score 0–45 &nbsp;|&nbsp; Strong momentum</div>
+          <div class="guide-desc">Use when market is in a clear directional move. High RSI + high open interest + positive sentiment = trend is intact. Avoid DCA here; Trend-Following Playbook captures momentum instead.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FOOTER ─────────────────────────────────────────── -->
+    <footer>
+      <div class="footer-logo">BEACON</div>
+      <div class="footer-sub">Built for Bitget AI Hackathon Season 1 &nbsp;&middot;&nbsp; Trading Infra Track</div>
+      <div class="footer-links">
+        <a href="https://github.com/Argeneau12e" target="_blank">GitHub</a>
+        <a href="https://www.bitget.com/activity-hub/agent-hub" target="_blank">Bitget Agent Hub</a>
+        <a href="https://www.bitget.com/activity-hub/hackathon" target="_blank">Hackathon</a>
+      </div>
+    </footer>
+
+  </div><!-- .app -->
+
+
+  <script>
+    /* ─────────────────────────────────────────────────────────
+       STATE
+    ───────────────────────────────────────────────────────── */
+    let currentSymbol = 'BTCUSDT';
+    let currentSignals = null;
+    let btChart = null;
+
+    /* ─────────────────────────────────────────────────────────
+       ANIMATED BACKGROUND CANVAS (DCA_Claw visual DNA)
+    ───────────────────────────────────────────────────────── */
+    (function () {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx    = canvas.getContext('2d');
+      const nodes  = [];
+      const COUNT  = 55;
+
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      for (let i = 0; i < COUNT; i++) {
+        nodes.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          r: Math.random() * 2 + 1,
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        nodes.forEach(n => {
+          n.x += n.vx; n.y += n.vy;
+          if (n.x < 0 || n.x > canvas.width)  n.vx *= -1;
+          if (n.y < 0 || n.y > canvas.height)  n.vy *= -1;
+
+          // node dot
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(245,158,11,0.6)';
+          ctx.fill();
+
+          // edges
+          nodes.forEach(m => {
+            const dx = n.x - m.x, dy = n.y - m.y;
+            const d  = Math.sqrt(dx * dx + dy * dy);
+            if (d < 140) {
+              ctx.beginPath();
+              ctx.moveTo(n.x, n.y);
+              ctx.lineTo(m.x, m.y);
+              ctx.strokeStyle = `rgba(245,158,11,${(1 - d / 140) * 0.18})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          });
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ─────────────────────────────────────────────────────────
+       UTILITIES
+    ───────────────────────────────────────────────────────── */
+    function fmtRSI(v)     { return v != null ? v.toFixed(1) : '--'; }
+    function fmtFR(v)      { return v != null ? (v * 100).toFixed(4) + '%' : '--'; }
+    function fmtFG(v)      { return v != null ? String(v) : '--'; }
+    function fmtOI(v)      {
+      if (v == null) return '--';
+      if (v >= 1e9)  return (v / 1e9).toFixed(2) + 'B';
+      if (v >= 1e6)  return (v / 1e6).toFixed(1) + 'M';
+      return v.toFixed(0);
+    }
+    function fmtDate(ts)   { return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric' }); }
+    function now()         { return new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }); }
+
+    function rsiClass(v) {
+      if (v <= 30) return 'bullish';
+      if (v >= 70) return 'bearish';
+      return 'neutral';
+    }
+    function rsiLabel(v) {
+      if (v <= 30) return 'Oversold — Strong Entry';
+      if (v <= 45) return 'Approaching Oversold';
+      if (v <= 55) return 'Neutral';
+      if (v < 70)  return 'Approaching Overbought';
+      return 'Overbought — Avoid Entry';
+    }
+
+    function frClass(v) {
+      if (v == null) return 'neutral';
+      if (v < -0.0001) return 'bullish';
+      if (v > 0.0004)  return 'bearish';
+      return 'neutral';
+    }
+    function frLabel(v) {
+      if (v == null)    return 'Unavailable';
+      if (v < -0.0001)  return 'Negative — Bullish Lean';
+      if (v < 0.0002)   return 'Near Zero — Neutral';
+      if (v < 0.0004)   return 'Positive — Watch Closely';
+      return 'High Positive — Crowded Longs';
+    }
+
+    function fgClass(v) {
+      if (v <= 25) return 'bullish';
+      if (v >= 65) return 'bearish';
+      return 'neutral';
+    }
+    function fgLabel(v) {
+      if (v <= 25)  return 'Extreme Fear — Best DCA Zone';
+      if (v <= 45)  return 'Fear — Good DCA Conditions';
+      if (v <= 55)  return 'Neutral';
+      if (v <= 75)  return 'Greed — Use Caution';
+      return 'Extreme Greed — Poor DCA Timing';
+    }
+
+    function scoreClass(s) {
+      if (s >= 65) return 'high';
+      if (s >= 40) return 'mid';
+      return 'low';
+    }
+    function scoreLabel(s) {
+      if (s >= 65) return 'Strong Entry Conditions';
+      if (s >= 40) return 'Moderate Conditions';
+      return 'Poor Entry Conditions';
+    }
+    function scoreDesc(s) {
+      if (s >= 65) return 'Multiple signals align for DCA. Consider starting or increasing your Bitget GetAgent Playbook DCA position.';
+      if (s >= 40) return 'Conditions are mixed. A conservative DCA with reduced amounts is reasonable.';
+      return 'Signals suggest caution. Consider pausing or reducing DCA activity. Grid or Trend-Following may be better.';
+    }
+
+    function detectPlaybook(text) {
+      const t = (text || '').toLowerCase();
+      if (t.includes('trend'))  return 'Trend-Following Playbook';
+      if (t.includes('grid'))   return 'Grid Trading Playbook';
+      return 'DCA Playbook';
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       UPDATE SIGNAL CARDS
+    ───────────────────────────────────────────────────────── */
+    function updateSignalCards(s) {
+      // RSI
+      setCard('rsi', fmtRSI(s.rsi), rsiLabel(s.rsi), rsiClass(s.rsi));
+
+      // Funding Rate
+      setCard('funding', fmtFR(s.fundingRate), frLabel(s.fundingRate), frClass(s.fundingRate));
+
+      // Fear & Greed
+      const fgLbl = s.fearGreedLabel
+        ? `${fgLabel(s.fearGreed)} (${s.fearGreedLabel})`
+        : fgLabel(s.fearGreed);
+      setCard('fg', fmtFG(s.fearGreed), fgLbl, fgClass(s.fearGreed));
+
+      // Open Interest
+      const oiCls = s.oiChange > 0 ? 'bullish' : s.oiChange < 0 ? 'bearish' : 'neutral';
+      const oiLbl = 'Futures Positioning (Live)';
+      setCard('oi', fmtOI(s.oiChange), oiLbl, 'neutral');
+    }
+
+    function setCard(id, value, status, cls) {
+      const card = document.getElementById(id + '-card');
+      const val  = document.getElementById(id + '-value');
+      const lbl  = document.getElementById(id + '-status');
+      card.className = 'signal-card ' + cls;
+      val.textContent  = value;
+      lbl.textContent  = status;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       UPDATE SCORE GAUGE
+    ───────────────────────────────────────────────────────── */
+    function updateScore(score) {
+      const ring = document.getElementById('gauge-ring');
+      const num  = document.getElementById('score-number');
+      const lbl  = document.getElementById('score-label');
+      const desc = document.getElementById('score-desc');
+
+      const circ = 502.65;
+      const fill = (score / 100) * circ;
+      ring.style.strokeDasharray = `${fill} ${circ}`;
+
+      const cls = scoreClass(score);
+      const colorMap = { high: '#10b981', mid: '#f59e0b', low: '#f43f5e' };
+      ring.style.stroke = colorMap[cls];
+
+      num.textContent = score;
+      num.className   = cls;
+      lbl.textContent  = scoreLabel(score);
+      lbl.style.color  = colorMap[cls];
+      desc.textContent = scoreDesc(score);
+
+      document.getElementById('last-updated').textContent = 'Updated ' + now();
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       LOAD SIGNALS  (/api/signals)
+    ───────────────────────────────────────────────────────── */
+    async function loadSignals() {
+      try {
+        const res  = await fetch(`/api/signals?symbol=${currentSymbol}`);
+        const data = await res.json();
+        currentSignals = data;
+        updateSignalCards(data);
+        updateScore(data.dcaScore);
+        return data;
+      } catch (e) {
+        console.error('Signals error:', e);
+        document.getElementById('ai-text').textContent = 'Could not reach server. Make sure node server.js is running.';
+        return null;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       LOAD AI ANALYSIS  (/api/analyze)
+    ───────────────────────────────────────────────────────── */
+    async function loadAnalysis(signals) {
+      const aiText = document.getElementById('ai-text');
+      aiText.className = 'loading-text';
+      aiText.textContent = 'Reading signals and generating analysis...';
+
+      try {
+        const res  = await fetch('/api/analyze', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(signals),
+        });
+        const data = await res.json();
+        aiText.className   = '';
+        aiText.textContent = data.analysis;
+
+        const playbook = detectPlaybook(data.analysis);
+        document.getElementById('playbook-type').textContent = playbook;
+      } catch (e) {
+        aiText.textContent = 'AI analysis unavailable. Check GROQ_API_KEY in your .env file.';
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       RUN BACKTEST  (/api/backtest)
+    ───────────────────────────────────────────────────────── */
+    async function runBacktest() {
+      const btn     = document.getElementById('run-btn');
+      const btPair  = document.getElementById('bt-pair').value;
+      const interval= parseInt(document.getElementById('bt-interval').value);
+
+      btn.disabled = true;
+      btn.textContent = 'Running...';
+
+      try {
+        // Fetch candles and fear & greed in parallel
+        const [candleRes, fgRes] = await Promise.all([
+          fetch(`/api/candles?symbol=${btPair}&granularity=1D&limit=90`),
+          fetch('/api/fear-greed'),
+        ]);
+        const candleData = await candleRes.json();
+        const fgData     = await fgRes.json();
+
+        const candles = candleData?.data;
+        const fg      = fgData?.data;
+
+        if (!candles || candles.length < 15) {
+          alert('Not enough candle data from Bitget. Try again in a moment.');
+          return;
+        }
+
+        // Send to backtest engine
+        const btRes  = await fetch('/api/backtest', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ candles, fearGreedHistory: fg, amount: 100, interval }),
+        });
+        const result = await btRes.json();
+
+        updateBacktestStats(result);
+        drawBacktestChart(result);
+      } catch (e) {
+        console.error('Backtest error:', e);
+        alert('Backtest failed. Check the console for details.');
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Run Backtest';
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       UPDATE BACKTEST STAT CARDS
+    ───────────────────────────────────────────────────────── */
+    function updateBacktestStats(result) {
+      const { plain, smart } = result;
+
+      const pRet = document.getElementById('plain-return');
+      const sRet = document.getElementById('smart-return');
+      pRet.textContent = (plain.returnPct >= 0 ? '+' : '') + plain.returnPct + '%';
+      sRet.textContent = (smart.returnPct >= 0 ? '+' : '') + smart.returnPct + '%';
+      pRet.className   = 'stat-val ' + (plain.returnPct >= 0 ? 'positive' : 'negative');
+      sRet.className   = 'stat-val ' + (smart.returnPct >= 0 ? 'positive' : 'negative');
+
+      document.getElementById('plain-buys').textContent = plain.totalBuys + ' buys';
+      document.getElementById('smart-buys').textContent = smart.totalBuys + ' buys';
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       DRAW CHART.JS BACKTEST CHART
+    ───────────────────────────────────────────────────────── */
+    function drawBacktestChart(result) {
+      const { plain, smart } = result;
+
+      const labels   = plain.values.map(p => fmtDate(p.t));
+      const plainVals = plain.values.map(p => p.v);
+      const smartVals = smart.values.map(p => p.v);
+
+      if (btChart) btChart.destroy();
+
+      const ctx = document.getElementById('backtest-chart').getContext('2d');
+      btChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label:           'Plain DCA',
+              data:            plainVals,
+              borderColor:     '#f59e0b',
+              backgroundColor: 'rgba(245,158,11,0.05)',
+              borderWidth:     1.8,
+              pointRadius:     0,
+              tension:         0.3,
+              fill:            true,
+            },
+            {
+              label:           'Smart DCA',
+              data:            smartVals,
+              borderColor:     '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.07)',
+              borderWidth:     2,
+              pointRadius:     0,
+              tension:         0.3,
+              fill:            true,
+            },
+          ],
+        },
+        options: {
+          responsive:          true,
+          maintainAspectRatio: false,
+          interaction:         { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#18171f',
+              borderColor:     'rgba(255,255,255,0.08)',
+              borderWidth:     1,
+              titleColor:      '#7a756d',
+              bodyColor:       '#f0ede8',
+              titleFont:       { family: "'IBM Plex Mono'", size: 10 },
+              bodyFont:        { family: "'IBM Plex Mono'", size: 12 },
+              callbacks: {
+                label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`,
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid:     { color: 'rgba(255,255,255,0.04)' },
+              ticks:    { color: '#3f3c38', font: { family: "'IBM Plex Mono'", size: 9 }, maxTicksLimit: 8 },
+              border:   { color: 'rgba(255,255,255,0.06)' },
+            },
+            y: {
+              grid:     { color: 'rgba(255,255,255,0.04)' },
+              ticks:    { color: '#3f3c38', font: { family: "'IBM Plex Mono'", size: 9 }, callback: v => '$' + v.toFixed(0) },
+              border:   { color: 'rgba(255,255,255,0.06)' },
+            },
+          },
+        },
+      });
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       REFRESH BUTTON STATE
+    ───────────────────────────────────────────────────────── */
+    function setRefreshing(v) {
+      document.getElementById('spin-icon').style.display    = v ? 'inline-block' : 'none';
+      document.getElementById('refresh-icon').style.display = v ? 'none' : 'inline-block';
+      document.getElementById('refresh-btn').classList.toggle('loading', v);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       PAIR CHANGE
+    ───────────────────────────────────────────────────────── */
+    function handlePairChange(val) {
+      currentSymbol = val;
+      loadAll();
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       LOAD ALL — main entry point called on page load + refresh
+    ───────────────────────────────────────────────────────── */
+    async function loadAll() {
+      setRefreshing(true);
+      const signals = await loadSignals();
+      if (signals) await loadAnalysis(signals);
+      setRefreshing(false);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       INIT
+    ───────────────────────────────────────────────────────── */
+    loadAll();
+
+    // Auto-refresh every 5 minutes
+    setInterval(loadAll, 5 * 60 * 1000);
+  </script>
+</body>
+</html>

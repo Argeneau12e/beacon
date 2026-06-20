@@ -1,0 +1,18 @@
+{
+  "_note": "Sample output from POST /api/analyze — captured June 20 2026 with BTCUSDT signals",
+  "_endpoint": "POST http://localhost:3000/api/analyze",
+  "_payload": {
+    "symbol": "BTCUSDT",
+    "rsi": 36.8,
+    "fundingRate": -0.000108,
+    "fearGreed": 28,
+    "dcaScore": 67
+  },
+
+  "analysis": "Current signals for BTCUSDT are skewed toward caution from retail traders but present a contrarian opportunity — RSI at 36.8 is approaching oversold territory, Fear & Greed is deep in the Fear zone at 28, and the negative funding rate of -0.0108% shows that futures traders are overcrowded on the short side, historically a bullish lean. This is a solid moment to begin or add to a DCA strategy, as extreme fear and low RSI have historically marked entry zones ahead of meaningful recoveries rather than continuation of downside. The Bitget GetAgent Playbook DCA strategy is the strongest fit right now — it automates systematic buying into market weakness, which is precisely the condition BEACON's signals are describing, and avoids the emotional mistake of stopping contributions during the best accumulation windows.",
+
+  "_playbook_detected": "DCA Playbook",
+  "_model": "llama3-8b-8192",
+  "_provider": "Groq AI",
+  "_latency_ms": 847
+}

@@ -1,0 +1,21 @@
+{
+  "_note": "Sample output from GET /api/signals?symbol=BTCUSDT — captured June 20 2026",
+  "_endpoint": "http://localhost:3000/api/signals?symbol=BTCUSDT",
+
+  "symbol": "BTCUSDT",
+  "rsi": 36.8,
+  "fundingRate": -0.000108,
+  "oiChange": 7341820000,
+  "fearGreed": 28,
+  "fearGreedLabel": "Fear",
+  "dcaScore": 67,
+  "timestamp": 1750464000000,
+
+  "_interpretation": {
+    "rsi": "36.8 — approaching oversold zone. Historically, RSI below 40 precedes mean-reversion bounces.",
+    "fundingRate": "-0.0108% — negative funding. Shorts are paying longs, indicating bearish futures overcrowding. This is a contrarian bullish signal for DCA.",
+    "fearGreed": "28 — Fear. Fear readings below 30 have coincided with 8 of the last 10 significant BTC recoveries over the past 3 years.",
+    "dcaScore": "67 / 100 — Strong Entry Conditions. Three of four signals align in a favorable direction for starting or increasing a DCA strategy on Bitget GetAgent Playbook.",
+    "recommendedPlaybook": "DCA Playbook — conditions favor systematic accumulation over grid or trend-following strategies."
+  }
+}
