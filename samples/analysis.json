@@ -1,18 +1,21 @@
 {
-  "_note": "Sample output from POST /api/analyze — captured June 20 2026 with BTCUSDT signals",
-  "_endpoint": "POST http://localhost:3000/api/analyze",
-  "_payload": {
-    "symbol": "BTCUSDT",
-    "rsi": 36.8,
-    "fundingRate": -0.000108,
-    "fearGreed": 28,
-    "dcaScore": 67
+  "_meta": {
+    "captured": "2026-06-21T22:34:27.536Z",
+    "source": "BEACON live API — auto-logged by server.js",
+    "description": "Real response from analysis endpoint"
   },
-
-  "analysis": "Current signals for BTCUSDT are skewed toward caution from retail traders but present a contrarian opportunity — RSI at 36.8 is approaching oversold territory, Fear & Greed is deep in the Fear zone at 28, and the negative funding rate of -0.0108% shows that futures traders are overcrowded on the short side, historically a bullish lean. This is a solid moment to begin or add to a DCA strategy, as extreme fear and low RSI have historically marked entry zones ahead of meaningful recoveries rather than continuation of downside. The Bitget GetAgent Playbook DCA strategy is the strongest fit right now — it automates systematic buying into market weakness, which is precisely the condition BEACON's signals are describing, and avoids the emotional mistake of stopping contributions during the best accumulation windows.",
-
-  "_playbook_detected": "DCA Playbook",
-  "_model": "llama3-8b-8192",
-  "_provider": "Groq AI",
-  "_latency_ms": 847
+  "request": {
+    "symbol": "BTCUSDT",
+    "rsi": 49.56,
+    "fundingRate": 0.000002,
+    "fearGreed": 23,
+    "volatility": 2.582,
+    "dcaScore": 84,
+    "regime": "NEUTRAL"
+  },
+  "response": {
+    "analysis": "The current NEUTRAL market regime and signals indicate a mixed and uncertain environment, where neither strong buying nor selling pressure is evident, suggesting a cautious approach to market participation. This is a moderate moment to DCA, as the signals are not strongly aligned in any direction, but the RSI and Fear & Greed indicators suggest some potential for a bullish move, while the Funding Rate and Daily Volatility suggest caution. In this scenario, Bitget's GetAgent Playbook recommends using the \"Neutral Zone\" strategy, with a standard DCA allocation of 80% of the available funds, and a buy interval of 1-2 days to capture potential price movements."
+  },
+  "model": "llama-3.1-8b-instant",
+  "provider": "Groq AI"
 }

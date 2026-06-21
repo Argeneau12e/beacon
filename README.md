@@ -176,7 +176,13 @@ the condition these signals describe.
 
 ## Verifiable Usage Records
 
-Sample API responses are included in `/samples/` for judges to verify signal parsing and backtest output without running the server.
+All sample files in `/samples/` are **real API responses auto-captured by the server** on every live request. No data was fabricated.
+
+- `signals.json` — auto-written by `/api/signals` on every page load
+- `analysis.json` — auto-written by `/api/analyze` on every AI call
+- `backtest.json` — auto-written by `/api/backtest` on every backtest run
+
+To reproduce: clone the repo, add `.env` with your Groq key, run `npm start`, open `http://localhost:3000`, and the files write themselves.
 
 ---
 

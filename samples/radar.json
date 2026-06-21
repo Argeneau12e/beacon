@@ -1,0 +1,127 @@
+{
+  "_meta": {
+    "captured": "2026-06-21T22:32:08.884Z",
+    "source": "BEACON live API — auto-logged by server.js",
+    "description": "Real response from radar endpoint"
+  },
+  "pairs": [
+    {
+      "symbol": "BTCUSDT",
+      "display": "BTC/USDT",
+      "rsi": 49.6,
+      "fundingRate": 0.000003,
+      "oiValue": 32625.4615,
+      "volatility": 2.582,
+      "fearGreed": 23,
+      "fearGreedLabel": "Extreme Fear",
+      "dcaScore": 83,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
+        "tier": "neutral",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      }
+    },
+    {
+      "symbol": "BNBUSDT",
+      "display": "BNB/USDT",
+      "rsi": 43.7,
+      "fundingRate": 0.000062,
+      "oiValue": 82265.5,
+      "volatility": 3.125,
+      "fearGreed": 23,
+      "fearGreedLabel": "Extreme Fear",
+      "dcaScore": 79,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
+        "tier": "neutral",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      }
+    },
+    {
+      "symbol": "XRPUSDT",
+      "display": "XRP/USDT",
+      "rsi": 45.3,
+      "fundingRate": 0.000039,
+      "oiValue": 156479942,
+      "volatility": 3.445,
+      "fearGreed": 23,
+      "fearGreedLabel": "Extreme Fear",
+      "dcaScore": 77,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
+        "tier": "neutral",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      }
+    },
+    {
+      "symbol": "ETHUSDT",
+      "display": "ETH/USDT",
+      "rsi": 52,
+      "fundingRate": -0.000019,
+      "oiValue": 719089.5,
+      "volatility": 3.674,
+      "fearGreed": 23,
+      "fearGreedLabel": "Extreme Fear",
+      "dcaScore": 73,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
+        "tier": "neutral",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      }
+    },
+    {
+      "symbol": "SOLUSDT",
+      "display": "SOL/USDT",
+      "rsi": 59.2,
+      "fundingRate": 0.000064,
+      "oiValue": 4352592.1,
+      "volatility": 3.925,
+      "fearGreed": 23,
+      "fearGreedLabel": "Extreme Fear",
+      "dcaScore": 64,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
+        "tier": "neutral",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      }
+    }
+  ],
+  "fearGreed": 23,
+  "fearGreedLabel": "Extreme Fear",
+  "timestamp": 1782081128883
+}

@@ -1,1192 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BEACON — Bitget Strategy Intelligence</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <style>
-    /* ── TOKENS ──────────────────────────────────────────────── */
-    :root {
-      --bg:           #09090c;
-      --bg-card:      rgba(255, 255, 255, 0.032);
-      --bg-card-hover:rgba(255, 255, 255, 0.055);
-      --border:       rgba(255, 255, 255, 0.07);
-      --border-amber: rgba(245, 158, 11, 0.3);
-      --text:         #f0ede8;
-      --text-muted:   #7a756d;
-      --text-dim:     #3f3c38;
-      --amber:        #f59e0b;
-      --amber-dim:    rgba(245, 158, 11, 0.12);
-      --green:        #10b981;
-      --green-dim:    rgba(16, 185, 129, 0.12);
-      --red:          #f43f5e;
-      --red-dim:      rgba(244, 63, 94, 0.12);
-      --yellow:       #eab308;
-      --yellow-dim:   rgba(234, 179, 8, 0.12);
-      --font-display: 'Cormorant Garamond', Georgia, serif;
-      --font-body:    'DM Sans', system-ui, sans-serif;
-      --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
-      --radius:       14px;
-      --radius-sm:    8px;
-      --circ:         502.65; /* 2 * pi * 80 */
-    }
-
-    /* ── RESET ───────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-body);
-      font-size: 14px;
-      line-height: 1.6;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── CANVAS BACKGROUND (DCA_Claw neural net aesthetic) ──── */
-    #bg-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      opacity: 0.18;
-      pointer-events: none;
-    }
-
-    /* ── LAYOUT ──────────────────────────────────────────────── */
-    .app {
-      position: relative;
-      z-index: 1;
-      max-width: 1160px;
-      margin: 0 auto;
-      padding: 32px 24px 64px;
-    }
-
-    /* ── HEADER ──────────────────────────────────────────────── */
-    header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 40px;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .logo-block { display: flex; flex-direction: column; gap: 4px; }
-    .logo {
-      font-family: var(--font-display);
-      font-size: 2.6rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      color: var(--text);
-      line-height: 1;
-    }
-    .logo span { color: var(--amber); }
-    .logo-sub {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-
-    .header-controls { display: flex; align-items: center; gap: 10px; }
-    select, button {
-      font-family: var(--font-body);
-      font-size: 13px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: var(--bg-card);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    select {
-      padding: 8px 14px;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a756d' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      padding-right: 32px;
-    }
-    select:focus { outline: none; border-color: var(--amber); }
-    .btn-refresh {
-      padding: 8px 18px;
-      border-color: var(--border-amber);
-      color: var(--amber);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-refresh:hover { background: var(--amber-dim); border-color: var(--amber); }
-    .btn-refresh.loading { opacity: 0.5; pointer-events: none; }
-    .spin { display: inline-block; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── SECTION LABEL ───────────────────────────────────────── */
-    .section-label {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-    }
-
-    /* ── MAIN GRID: signals left, score right ────────────────── */
-    .top-grid {
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 16px;
-      margin-bottom: 16px;
-      align-items: start;
-    }
-    @media (max-width: 780px) {
-      .top-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ── SIGNAL CARDS ────────────────────────────────────────── */
-    .signals-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    @media (max-width: 480px) {
-      .signals-grid { grid-template-columns: 1fr; }
-    }
-
-    .signal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .signal-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      border-radius: 2px 2px 0 0;
-      background: var(--card-accent, var(--text-dim));
-      transition: background 0.4s;
-    }
-    .signal-card.bullish { --card-accent: var(--green); border-color: rgba(16,185,129,0.2); }
-    .signal-card.bearish { --card-accent: var(--red);   border-color: rgba(244,63,94,0.2); }
-    .signal-card.neutral { --card-accent: var(--amber); border-color: rgba(245,158,11,0.15); }
-    .signal-card.loading-state { --card-accent: var(--text-dim); }
-
-    .card-icon {
-      width: 28px; height: 28px;
-      margin-bottom: 12px;
-      opacity: 0.5;
-    }
-    .card-name {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .card-value {
-      font-family: var(--font-mono);
-      font-size: 1.7rem;
-      font-weight: 400;
-      color: var(--text);
-      line-height: 1;
-      margin-bottom: 8px;
-      transition: color 0.3s;
-    }
-    .signal-card.bullish .card-value { color: var(--green); }
-    .signal-card.bearish .card-value { color: var(--red); }
-    .signal-card.neutral .card-value { color: var(--amber); }
-
-    .card-status {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-    }
-    .signal-card.bullish .card-status { color: var(--green); }
-    .signal-card.bearish .card-status { color: var(--red); }
-    .signal-card.neutral .card-status { color: var(--amber); }
-    .signal-card.loading-state .card-status { color: var(--text-dim); }
-
-    .card-desc {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      line-height: 1.5;
-    }
-
-    /* skeleton pulse */
-    .skeleton {
-      background: linear-gradient(90deg, var(--bg-card) 25%, rgba(255,255,255,0.06) 50%, var(--bg-card) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 4px;
-      height: 1em;
-      width: 60%;
-    }
-    @keyframes shimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* ── SCORE GAUGE ─────────────────────────────────────────── */
-    .score-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .score-title {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      text-align: center;
-    }
-    .gauge-wrap { position: relative; width: 180px; height: 180px; }
-    .gauge-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-    .gauge-bg {
-      fill: none;
-      stroke: rgba(255,255,255,0.06);
-      stroke-width: 10;
-    }
-    .gauge-ring {
-      fill: none;
-      stroke: var(--amber);
-      stroke-width: 10;
-      stroke-linecap: round;
-      stroke-dasharray: 0 502.65;
-      transition: stroke-dasharray 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s;
-    }
-    .gauge-center {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    #score-number {
-      font-family: var(--font-mono);
-      font-size: 3rem;
-      font-weight: 300;
-      line-height: 1;
-      color: var(--text);
-      transition: color 0.5s;
-    }
-    #score-number.high { color: var(--green); }
-    #score-number.mid  { color: var(--amber); }
-    #score-number.low  { color: var(--red); }
-    .score-sub {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-      margin-top: 2px;
-    }
-    #score-label {
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      text-align: center;
-    }
-    #score-desc {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.5;
-      max-width: 220px;
-    }
-    .last-updated {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      color: var(--text-dim);
-      text-align: center;
-    }
-
-    /* ── GLASS CARD (generic) ────────────────────────────────── */
-    .glass-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 16px;
-    }
-    .glass-card-title {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .badge {
-      font-size: 0.58rem;
-      padding: 2px 7px;
-      border-radius: 20px;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-    }
-    .badge-amber {
-      background: var(--amber-dim);
-      color: var(--amber);
-      border: 1px solid rgba(245,158,11,0.2);
-    }
-    .badge-green {
-      background: var(--green-dim);
-      color: var(--green);
-      border: 1px solid rgba(16,185,129,0.2);
-    }
-
-    /* ── AI ADVISOR ──────────────────────────────────────────── */
-    #ai-text {
-      font-size: 0.92rem;
-      line-height: 1.75;
-      color: var(--text);
-      margin-bottom: 16px;
-    }
-    #ai-text.loading-text { color: var(--text-muted); font-style: italic; }
-    .playbook-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: var(--amber-dim);
-      border: 1px solid var(--border-amber);
-      border-radius: var(--radius-sm);
-    }
-    .playbook-label {
-      font-family: var(--font-mono);
-      font-size: 0.63rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    #playbook-type {
-      font-weight: 600;
-      font-size: 0.88rem;
-      color: var(--amber);
-    }
-    .playbook-arrow {
-      margin-left: auto;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--amber);
-    }
-
-    /* ── BACKTEST SECTION ────────────────────────────────────── */
-    .backtest-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .backtest-controls select { width: auto; }
-    .btn-run {
-      padding: 8px 20px;
-      background: var(--amber);
-      color: #0a0909;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      font-size: 13px;
-      letter-spacing: 0.03em;
-      transition: opacity 0.2s;
-    }
-    .btn-run:hover { opacity: 0.85; }
-    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .backtest-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    @media (max-width: 600px) {
-      .backtest-stats { grid-template-columns: 1fr 1fr; }
-    }
-    .stat-card {
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px;
-      text-align: center;
-    }
-    .stat-name {
-      font-family: var(--font-mono);
-      font-size: 0.58rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .stat-val {
-      font-family: var(--font-mono);
-      font-size: 1.15rem;
-      font-weight: 400;
-    }
-    .stat-val.positive { color: var(--green); }
-    .stat-val.negative { color: var(--red); }
-    .stat-val.amber    { color: var(--amber); }
-    .stat-val.plain-col { color: #f59e0b; }
-    .stat-val.smart-col { color: var(--green); }
-
-    .chart-wrap {
-      position: relative;
-      height: 300px;
-      margin-bottom: 12px;
-    }
-    #backtest-chart { width: 100% !important; height: 100% !important; }
-
-    .chart-legend {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-    .legend-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-    }
-
-    /* ── HOW TO USE ──────────────────────────────────────────── */
-    .playbook-guide {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    @media (max-width: 600px) {
-      .playbook-guide { grid-template-columns: 1fr; }
-    }
-    .guide-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-    }
-    .guide-type {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .guide-type.dca   { color: var(--green); }
-    .guide-type.grid  { color: var(--amber); }
-    .guide-type.trend { color: #818cf8; }
-    .guide-score-range {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .guide-desc {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      line-height: 1.55;
-    }
-
-    /* ── FOOTER ──────────────────────────────────────────────── */
-    footer {
-      text-align: center;
-      margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-    }
-    .footer-logo {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .footer-sub {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.12em;
-      color: var(--text-dim);
-    }
-    .footer-links {
-      margin-top: 12px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    .footer-links a {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      color: var(--text-dim);
-      text-decoration: none;
-      letter-spacing: 0.1em;
-      transition: color 0.2s;
-    }
-    .footer-links a:hover { color: var(--amber); }
-
-    /* ── DIVIDER ─────────────────────────────────────────────── */
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 24px 0;
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BEACON — Bitget Strategy Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#09090c;--bg2:rgba(255,255,255,.032);
+  --border:rgba(255,255,255,.07);--border-a:rgba(245,158,11,.28);
+  --text:#f0ede8;--muted:#7a756d;--dim:#2e2c29;
+  --amber:#f59e0b;--amber-d:rgba(245,158,11,.1);
+  --green:#10b981;--green-d:rgba(16,185,129,.1);
+  --red:#f43f5e;--red-d:rgba(244,63,94,.1);
+  --blue:#38bdf8;--blue-d:rgba(56,189,248,.1);
+  --r:14px;--rs:8px;
+  --display:'Cormorant Garamond',Georgia,serif;
+  --body:'DM Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono','Courier New',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+#bg-canvas{position:fixed;inset:0;z-index:0;opacity:.15;pointer-events:none}
+.app{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:32px 24px 80px}
+header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;gap:16px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-size:2.8rem;font-weight:500;letter-spacing:.12em;line-height:1}
+.logo span{color:var(--amber)}
+.logo-sub{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-top:4px}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+select,button{font-family:var(--body);font-size:13px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg2);color:var(--text);cursor:pointer;transition:all .2s}
+select{padding:8px 32px 8px 14px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a756d' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+select:focus{outline:none;border-color:var(--amber)}
+.btn-refresh{padding:8px 18px;border-color:var(--border-a);color:var(--amber);display:flex;align-items:center;gap:6px}
+.btn-refresh:hover{background:var(--amber-d)}
+.btn-refresh.spinning{opacity:.5;pointer-events:none}
+.ico-spin{display:none;animation:spin 1s linear infinite}
+.spinning .ico-spin{display:inline-block}
+.spinning .ico-static{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.regime-banner{display:flex;align-items:flex-start;gap:16px;padding:18px 22px;border-radius:var(--r);border:1px solid var(--regime-color,var(--border));background:rgba(var(--regime-rgb,255,255,255),.04);margin-bottom:16px;transition:all .5s}
+.regime-dot{width:10px;height:10px;border-radius:50%;background:var(--regime-color,var(--muted));margin-top:5px;flex-shrink:0;box-shadow:0 0 8px var(--regime-color,transparent)}
+.regime-name{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--regime-color,var(--muted));margin-bottom:3px}
+.regime-label{font-family:var(--display);font-size:1.3rem;font-weight:500;color:var(--text);margin-bottom:4px;line-height:1.2}
+.regime-desc{font-size:.8rem;color:var(--muted);line-height:1.6;max-width:680px}
+.regime-playbook{font-family:var(--mono);font-size:.65rem;color:var(--regime-color,var(--muted));margin-top:8px;letter-spacing:.06em}
+.slbl{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.top-grid{display:grid;grid-template-columns:1fr 260px;gap:14px;margin-bottom:14px;align-items:start}
+@media(max-width:800px){.top-grid{grid-template-columns:1fr}}
+.signals-wrap{display:flex;flex-direction:column;gap:10px}
+.sig-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.sig-row.two{grid-template-columns:1fr 1fr}
+@media(max-width:520px){.sig-row,.sig-row.two{grid-template-columns:1fr}}
+.signal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;transition:background .2s,border-color .3s}
+.signal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;background:var(--c-accent,var(--dim));transition:background .4s}
+.signal-card.bullish{--c-accent:var(--green);border-color:rgba(16,185,129,.2)}
+.signal-card.bearish{--c-accent:var(--red);border-color:rgba(244,63,94,.2)}
+.signal-card.neutral{--c-accent:var(--amber);border-color:rgba(245,158,11,.15)}
+.card-icon{width:24px;height:24px;margin-bottom:10px;opacity:.45}
+.card-name{font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.card-val{font-family:var(--mono);font-size:1.6rem;font-weight:400;color:var(--text);line-height:1;margin-bottom:6px;transition:color .3s}
+.signal-card.bullish .card-val{color:var(--green)}
+.signal-card.bearish .card-val{color:var(--red)}
+.signal-card.neutral .card-val{color:var(--amber)}
+.card-lbl{font-size:.7rem;font-weight:500}
+.signal-card.bullish .card-lbl{color:var(--green)}
+.signal-card.bearish .card-lbl{color:var(--red)}
+.signal-card.neutral .card-lbl{color:var(--amber)}
+.card-desc{font-size:.68rem;color:var(--muted);margin-top:4px;line-height:1.5}
+.skel{background:linear-gradient(90deg,var(--bg2) 25%,rgba(255,255,255,.06) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;height:1em;width:55%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.score-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.score-ttl{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:center}
+.gauge-wrap{position:relative;width:160px;height:160px}
+.gauge-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gauge-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10}
+.gauge-ring{fill:none;stroke:var(--amber);stroke-width:10;stroke-linecap:round;stroke-dasharray:0 502.65;transition:stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1),stroke .5s}
+.gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#score-num{font-family:var(--mono);font-size:2.8rem;font-weight:300;line-height:1;color:var(--text);transition:color .5s}
+#score-num.high{color:var(--green)}
+#score-num.mid{color:var(--amber)}
+#score-num.low{color:var(--red)}
+.score-slash{font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+#score-lbl{font-size:.82rem;font-weight:500;text-align:center}
+#score-interval{font-family:var(--mono);font-size:.6rem;color:var(--muted);text-align:center;line-height:1.5;max-width:200px;margin-top:2px}
+.last-upd{font-family:var(--mono);font-size:.58rem;color:var(--dim);text-align:center}
+.glass{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px}
+.glass-ttl{font-family:var(--mono);font-size:.63rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:.58rem;padding:2px 7px;border-radius:20px;font-weight:500;letter-spacing:.05em}
+.badge-a{background:var(--amber-d);color:var(--amber);border:1px solid rgba(245,158,11,.22)}
+.badge-g{background:var(--green-d);color:var(--green);border:1px solid rgba(16,185,129,.22)}
+.badge-b{background:var(--blue-d);color:var(--blue);border:1px solid rgba(56,189,248,.22)}
+#ai-text{font-size:.88rem;line-height:1.8;color:var(--text);margin-bottom:16px}
+#ai-text.loading{color:var(--muted);font-style:italic}
+.pb-row{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--amber-d);border:1px solid var(--border-a);border-radius:var(--rs);cursor:pointer}
+.pb-lbl{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#pb-type{font-weight:600;font-size:.9rem;color:var(--amber);margin-top:2px}
+.pb-arrow{margin-left:auto;font-family:var(--mono);font-size:.68rem;color:var(--amber)}
+.config-block{font-family:var(--mono);font-size:.72rem;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:var(--rs);padding:16px;margin-top:14px;line-height:2}
+.config-row{display:flex;gap:12px}
+.config-key{color:var(--muted);min-width:140px;flex-shrink:0}
+.config-val{color:var(--text)}
+.v-green{color:var(--green)}.v-amber{color:var(--amber)}.v-red{color:var(--red)}
+.btn-copy{margin-top:12px;padding:7px 16px;font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;border-color:var(--border-a);color:var(--amber);border-radius:var(--rs);cursor:pointer;background:transparent;transition:background .2s}
+.btn-copy:hover{background:var(--amber-d)}
+.bt-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.btn-run{padding:8px 22px;background:var(--amber);color:#0a0909;border:none;border-radius:var(--rs);font-weight:600;font-size:13px;cursor:pointer;transition:opacity .2s}
+.btn-run:hover{opacity:.85}
+.btn-run:disabled{opacity:.4;cursor:not-allowed}
+.bt-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px}
+@media(max-width:700px){.bt-stats{grid-template-columns:repeat(3,1fr)}}
+.stat{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:var(--rs);padding:12px;text-align:center}
+.stat-n{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.stat-v{font-family:var(--mono);font-size:1.1rem}
+.stat-v.pos{color:var(--green)}.stat-v.neg{color:var(--red)}.stat-v.amb{color:var(--amber)}.stat-v.blue{color:var(--blue)}
+.chart-wrap{position:relative;height:280px;margin-bottom:12px}
+.legend{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--muted)}
+.leg-dot{width:9px;height:9px;border-radius:50%}
+.guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.guide-grid{grid-template-columns:1fr}}
+.guide-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--rs);padding:16px}
+.guide-type{font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;font-weight:500}
+.guide-type.dca{color:var(--green)}.guide-type.grid{color:var(--amber)}.guide-type.trend{color:var(--blue)}
+.guide-range{font-size:.7rem;color:var(--muted);margin-bottom:8px}
+.guide-desc{font-size:.74rem;color:var(--muted);line-height:1.6}
+footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border)}
+.ft-logo{font-family:var(--display);font-size:1.1rem;font-weight:500;letter-spacing:.1em;color:var(--muted)}
+.ft-sub{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;color:var(--dim);margin-top:4px}
+.ft-links{margin-top:12px;display:flex;justify-content:center;gap:20px}
+.ft-links a{font-family:var(--mono);font-size:.6rem;color:var(--dim);text-decoration:none;letter-spacing:.1em;transition:color .2s}
+.ft-links a:hover{color:var(--amber)}
+</style>
 </head>
-
 <body>
-  <!-- Animated background canvas (DCA_Claw visual DNA) -->
-  <canvas id="bg-canvas"></canvas>
+<canvas id="bg-canvas"></canvas>
+<div class="app">
 
-  <div class="app">
+<header>
+  <div>
+    <div class="logo">BE<span>A</span>CON</div>
+    <div class="logo-sub">Bitget Strategy Intelligence Layer &nbsp;/&nbsp; AI Hackathon S1</div>
+  </div>
+  <div class="hdr-right">
+    <select id="pair-sel" onchange="handlePair(this.value)">
+      <option value="BTCUSDT">BTC / USDT</option>
+      <option value="ETHUSDT">ETH / USDT</option>
+      <option value="SOLUSDT">SOL / USDT</option>
+      <option value="BNBUSDT">BNB / USDT</option>
+      <option value="XRPUSDT">XRP / USDT</option>
+    </select>
+    <button class="btn-refresh" id="refresh-btn" onclick="loadAll()">
+      <svg class="ico-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      <svg class="ico-static" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+      Refresh
+    </button>
+  </div>
+</header>
 
-    <!-- ── HEADER ─────────────────────────────────────────── -->
-    <header>
-      <div class="logo-block">
-        <div class="logo">BE<span>A</span>CON</div>
-        <div class="logo-sub">Bitget Strategy Intelligence &nbsp;/&nbsp; AI Hackathon S1</div>
+<div class="regime-banner" id="regime-banner">
+  <div class="regime-dot" id="regime-dot"></div>
+  <div>
+    <div class="regime-name" id="regime-name">Analyzing market...</div>
+    <div class="regime-label" id="regime-label">Loading regime classifier</div>
+    <div class="regime-desc" id="regime-desc">BEACON is fetching live signals from Bitget's Agent Hub API.</div>
+    <div class="regime-playbook" id="regime-playbook"></div>
+  </div>
+</div>
+
+<div class="slbl">Live Market Intelligence</div>
+<div class="top-grid">
+  <div class="signals-wrap">
+    <div class="sig-row">
+      <div class="signal-card" id="rsi-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <div class="card-name">RSI (14-Day)</div>
+        <div class="card-val" id="rsi-val"><span class="skel">&nbsp;</span></div>
+        <div class="card-lbl" id="rsi-lbl">Loading...</div>
+        <div class="card-desc">Momentum. Below 30 = oversold entry zone.</div>
       </div>
-      <div class="header-controls">
-        <select id="pair-select" onchange="handlePairChange(this.value)">
-          <option value="BTCUSDT">BTC / USDT</option>
-          <option value="ETHUSDT">ETH / USDT</option>
-          <option value="SOLUSDT">SOL / USDT</option>
-          <option value="BNBUSDT">BNB / USDT</option>
-          <option value="XRPUSDT">XRP / USDT</option>
-        </select>
-        <button class="btn-refresh" id="refresh-btn" onclick="loadAll()">
-          <svg class="spin" style="display:none" id="spin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-          <svg id="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-          Refresh
-        </button>
+      <div class="signal-card" id="fr-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+        <div class="card-name">Funding Rate</div>
+        <div class="card-val" id="fr-val"><span class="skel">&nbsp;</span></div>
+        <div class="card-lbl" id="fr-lbl">Loading...</div>
+        <div class="card-desc">Futures positioning. Negative = bears paying longs.</div>
       </div>
-    </header>
-
-    <!-- ── SIGNAL PANEL + SCORE ───────────────────────────── -->
-    <div class="section-label">Live Market Signals</div>
-    <div class="top-grid">
-
-      <!-- 4 Signal Cards -->
-      <div class="signals-grid">
-
-        <!-- RSI -->
-        <div class="signal-card loading-state" id="rsi-card">
-          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-          <div class="card-name">RSI (14-Day)</div>
-          <div class="card-value" id="rsi-value"><span class="skeleton">&nbsp;</span></div>
-          <div class="card-status" id="rsi-status">Loading...</div>
-          <div class="card-desc" id="rsi-desc">Momentum indicator. Below 30 = oversold entry zone.</div>
-        </div>
-
-        <!-- Funding Rate -->
-        <div class="signal-card loading-state" id="funding-card">
-          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>
-          </svg>
-          <div class="card-name">Funding Rate</div>
-          <div class="card-value" id="funding-value"><span class="skeleton">&nbsp;</span></div>
-          <div class="card-status" id="funding-status">Loading...</div>
-          <div class="card-desc" id="funding-desc">Futures positioning. Negative = bears paying longs.</div>
-        </div>
-
-        <!-- Fear & Greed -->
-        <div class="signal-card loading-state" id="fg-card">
-          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
-          </svg>
-          <div class="card-name">Fear &amp; Greed</div>
-          <div class="card-value" id="fg-value"><span class="skeleton">&nbsp;</span></div>
-          <div class="card-status" id="fg-status">Loading...</div>
-          <div class="card-desc" id="fg-desc">Market sentiment 0–100. Below 25 = historically best DCA zone.</div>
-        </div>
-
-        <!-- Open Interest -->
-        <div class="signal-card loading-state" id="oi-card">
-          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
-          <div class="card-name">Open Interest</div>
-          <div class="card-value" id="oi-value"><span class="skeleton">&nbsp;</span></div>
-          <div class="card-status" id="oi-status">Loading...</div>
-          <div class="card-desc" id="oi-desc">Total futures positions. Rising = new capital entering market.</div>
-        </div>
-
-      </div>
-
-      <!-- Score Gauge -->
-      <div class="score-panel">
-        <div class="score-title">DCA Entry Score</div>
-        <div class="gauge-wrap">
-          <svg class="gauge-svg" viewBox="0 0 200 200">
-            <circle class="gauge-bg" cx="100" cy="100" r="80"/>
-            <circle class="gauge-ring" id="gauge-ring" cx="100" cy="100" r="80"/>
-          </svg>
-          <div class="gauge-center">
-            <div id="score-number" class="mid">--</div>
-            <div class="score-sub">/ 100</div>
-          </div>
-        </div>
-        <div id="score-label" style="color: var(--text-muted)">Calculating...</div>
-        <div id="score-desc" class="score-sub" style="color:var(--text-dim); font-size:0.65rem; text-align:center; max-width:200px; line-height:1.5; margin-top:4px">
-          Combines RSI, Funding Rate,<br>Fear &amp; Greed into one signal
-        </div>
-        <div class="last-updated" id="last-updated"></div>
-      </div>
-
-    </div>
-
-    <!-- ── AI STRATEGY ADVISOR ────────────────────────────── -->
-    <div class="glass-card" style="margin-top:16px;">
-      <div class="glass-card-title">
-        AI Strategy Advisor
-        <span class="badge badge-amber">Groq AI</span>
-        <span class="badge badge-green" id="live-badge">LIVE</span>
-      </div>
-      <div id="ai-text" class="loading-text">Analyzing market signals...</div>
-      <div class="playbook-row">
-        <div>
-          <div class="playbook-label">Recommended Bitget Playbook</div>
-          <div id="playbook-type">Analyzing...</div>
-        </div>
-        <div class="playbook-arrow">Open in GetAgent &rarr;</div>
+      <div class="signal-card" id="fg-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        <div class="card-name">Fear &amp; Greed</div>
+        <div class="card-val" id="fg-val"><span class="skel">&nbsp;</span></div>
+        <div class="card-lbl" id="fg-lbl">Loading...</div>
+        <div class="card-desc">Sentiment 0-100. Below 25 = historically best DCA zone.</div>
       </div>
     </div>
-
-    <!-- ── BACKTEST ────────────────────────────────────────── -->
-    <div class="glass-card">
-      <div class="glass-card-title">
-        Strategy Backtester
-        <span class="badge badge-amber">90-Day Simulation</span>
+    <div class="sig-row two">
+      <div class="signal-card" id="oi-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <div class="card-name">Open Interest</div>
+        <div class="card-val" id="oi-val"><span class="skel">&nbsp;</span></div>
+        <div class="card-lbl" id="oi-lbl">Futures Positioning</div>
+        <div class="card-desc">Total active futures contracts. Rising = new capital entering.</div>
       </div>
-
-      <div class="backtest-controls">
-        <select id="bt-pair">
-          <option value="BTCUSDT">BTC / USDT</option>
-          <option value="ETHUSDT">ETH / USDT</option>
-          <option value="SOLUSDT">SOL / USDT</option>
-          <option value="BNBUSDT">BNB / USDT</option>
-          <option value="XRPUSDT">XRP / USDT</option>
-        </select>
-        <select id="bt-interval">
-          <option value="7">Weekly DCA (every 7 days)</option>
-          <option value="14">Bi-weekly (every 14 days)</option>
-          <option value="30">Monthly (every 30 days)</option>
-        </select>
-        <button class="btn-run" id="run-btn" onclick="runBacktest()">Run Backtest</button>
-      </div>
-
-      <div class="backtest-stats">
-        <div class="stat-card">
-          <div class="stat-name">Plain DCA Return</div>
-          <div class="stat-val plain-col" id="plain-return">--</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-name">Smart DCA Return</div>
-          <div class="stat-val smart-col" id="smart-return">--</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-name">Plain Buys</div>
-          <div class="stat-val amber" id="plain-buys">--</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-name">Smart Buys</div>
-          <div class="stat-val amber" id="smart-buys">--</div>
-        </div>
-      </div>
-
-      <div class="chart-wrap">
-        <canvas id="backtest-chart"></canvas>
-      </div>
-
-      <div class="chart-legend">
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#f59e0b"></div>
-          Plain DCA (buys every N days)
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#10b981"></div>
-          Smart DCA (buys only when BEACON signals are favorable)
-        </div>
+      <div class="signal-card" id="vol-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <div class="card-name">Daily Volatility</div>
+        <div class="card-val" id="vol-val"><span class="skel">&nbsp;</span></div>
+        <div class="card-lbl" id="vol-lbl">Loading...</div>
+        <div class="card-desc">Std-dev of daily returns. 1-3% = ideal DCA range.</div>
       </div>
     </div>
+  </div>
+  <div class="score-panel">
+    <div class="score-ttl">DCA Entry Score</div>
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 200 200">
+        <circle class="gauge-bg" cx="100" cy="100" r="80"/>
+        <circle class="gauge-ring" id="gauge-ring" cx="100" cy="100" r="80"/>
+      </svg>
+      <div class="gauge-center">
+        <div id="score-num" class="mid">--</div>
+        <div class="score-slash">/ 100</div>
+      </div>
+    </div>
+    <div id="score-lbl" style="color:var(--muted)">Calculating...</div>
+    <div id="score-interval" style="margin-top:6px"></div>
+    <div class="last-upd" id="last-upd"></div>
+  </div>
+</div>
 
-    <!-- ── PLAYBOOK GUIDE ─────────────────────────────────── -->
-    <div class="glass-card">
-      <div class="glass-card-title">How to Use This with Bitget GetAgent Playbook</div>
-      <div class="playbook-guide">
-        <div class="guide-card">
-          <div class="guide-type dca">DCA Strategy</div>
-          <div class="guide-score-range">Score 60–100 &nbsp;|&nbsp; Best fit</div>
-          <div class="guide-desc">Use when Fear &amp; Greed is low and RSI is oversold. Set a recurring buy at your chosen interval directly in GetAgent Playbook. Let BEACON confirm the entry zone before starting.</div>
+<div class="glass">
+  <div class="glass-ttl">AI Strategy Advisor <span class="badge badge-a">Groq AI — Llama 3.1</span><span class="badge badge-g">LIVE</span></div>
+  <div id="ai-text" class="loading">Analyzing live signals...</div>
+  <div class="pb-row" onclick="window.open('https://www.bitget.com/activity-hub/agent-hub','_blank')">
+    <div><div class="pb-lbl">Recommended Bitget GetAgent Playbook</div><div id="pb-type">Analyzing...</div></div>
+    <div class="pb-arrow">Open in GetAgent &rarr;</div>
+  </div>
+</div>
+
+<div class="glass">
+  <div class="glass-ttl">Playbook Config Generator <span class="badge badge-b">Auto-generated from live signals</span></div>
+  <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Ready-to-use configuration for Bitget GetAgent Playbook based on the current market regime, DCA Entry Score, and volatility-optimised interval.</div>
+  <div class="config-block">
+    <div class="config-row"><span class="config-key">Strategy</span><span class="config-val" id="cfg-strategy">--</span></div>
+    <div class="config-row"><span class="config-key">Pair</span><span class="config-val" id="cfg-pair">--</span></div>
+    <div class="config-row"><span class="config-key">Amount per Cycle</span><span class="config-val v-amber" id="cfg-amount">--</span></div>
+    <div class="config-row"><span class="config-key">Frequency</span><span class="config-val v-amber" id="cfg-freq">--</span></div>
+    <div class="config-row"><span class="config-key">Entry Condition</span><span class="config-val" id="cfg-entry">--</span></div>
+    <div class="config-row"><span class="config-key">Pause Condition</span><span class="config-val" id="cfg-pause">--</span></div>
+    <div class="config-row"><span class="config-key">Market Regime</span><span class="config-val" id="cfg-regime">--</span></div>
+    <div class="config-row"><span class="config-key">Signal Confidence</span><span class="config-val" id="cfg-confidence">--</span></div>
+    <div class="config-row"><span class="config-key">Optimizer Reason</span><span class="config-val" id="cfg-reason" style="color:var(--muted);font-size:.68rem">--</span></div>
+    <div class="config-row"><span class="config-key">Generated</span><span class="config-val" id="cfg-ts" style="color:var(--dim);font-size:.65rem">--</span></div>
+  </div>
+  <button class="btn-copy" onclick="copyConfig()">Copy Configuration</button>
+</div>
+
+<div class="glass">
+  <div class="glass-ttl">Strategy Backtester <span class="badge badge-a">90-Day Simulation</span></div>
+  <div class="bt-controls">
+    <select id="bt-pair"><option value="BTCUSDT">BTC / USDT</option><option value="ETHUSDT">ETH / USDT</option><option value="SOLUSDT">SOL / USDT</option><option value="BNBUSDT">BNB / USDT</option><option value="XRPUSDT">XRP / USDT</option></select>
+    <select id="bt-interval"><option value="7">Weekly DCA (every 7 days)</option><option value="14">Bi-weekly (every 14 days)</option><option value="30">Monthly (every 30 days)</option><option value="3">3-Day DCA (high volatility)</option></select>
+    <button class="btn-run" id="run-btn" onclick="runBacktest()">Run Backtest</button>
+  </div>
+  <div class="bt-stats">
+    <div class="stat"><div class="stat-n">Plain DCA Return</div><div class="stat-v amb" id="plain-ret">--</div></div>
+    <div class="stat"><div class="stat-n">Smart DCA Return</div><div class="stat-v pos" id="smart-ret">--</div></div>
+    <div class="stat"><div class="stat-n">Plain Sharpe</div><div class="stat-v blue" id="plain-sharpe">--</div></div>
+    <div class="stat"><div class="stat-n">Smart Sharpe</div><div class="stat-v blue" id="smart-sharpe">--</div></div>
+    <div class="stat"><div class="stat-n">Plain Max DD</div><div class="stat-v neg" id="plain-dd">--</div></div>
+    <div class="stat"><div class="stat-n">Smart Max DD</div><div class="stat-v neg" id="smart-dd">--</div></div>
+  </div>
+  <div class="chart-wrap"><canvas id="bt-chart"></canvas></div>
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:#f59e0b"></div>Plain DCA — buys every N days regardless of conditions</div>
+    <div class="leg"><div class="leg-dot" style="background:#10b981"></div>Smart DCA — buys only when RSI &lt; 45 AND Fear &amp; Greed &lt; 50</div>
+  </div>
+</div>
+
+<div class="glass" id="radar-section">
+  <div class="glass-ttl">Multi-Pair Signal Radar <span class="badge badge-a">5 Pairs Simultaneously</span><span class="badge badge-g">Bitget Agent Hub</span></div>
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.7">BEACON scans all five supported Bitget trading pairs simultaneously using live Agent Hub data, scores each one, and ranks them by DCA Entry Score — showing you exactly where the best accumulation opportunity exists right now across the entire Bitget ecosystem.</div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn-run" id="radar-btn" onclick="runRadar()">Run Radar Scan</button>
+    <span style="font-family:var(--mono);font-size:.62rem;color:var(--dim)" id="radar-ts"></span>
+  </div>
+  <div id="radar-table" style="display:none"></div>
+  <div id="radar-empty" style="font-family:var(--mono);font-size:.72rem;color:var(--dim);text-align:center;padding:24px 0">Hit "Run Radar Scan" to rank all pairs by signal strength</div>
+</div>
+
+<div class="glass" id="autopsy-section">
+  <div class="glass-ttl">Signal Autopsy <span class="badge badge-a">90-Day Accuracy Verification</span><span class="badge badge-b">Real Bitget Data</span></div>
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.7">BEACON retroactively applies its regime classifier to 90 days of real Bitget historical price data and Fear &amp; Greed history. For every day in the window, it calculates what signal would have been issued — then verifies whether the market moved as predicted 7 and 14 days later. This is a signal accuracy audit, not a P&amp;L backtest.</div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+    <select id="autopsy-pair"><option value="BTCUSDT">BTC / USDT</option><option value="ETHUSDT">ETH / USDT</option><option value="SOLUSDT">SOL / USDT</option><option value="BNBUSDT">BNB / USDT</option><option value="XRPUSDT">XRP / USDT</option></select>
+    <button class="btn-run" id="autopsy-btn" onclick="runAutopsy()">Run Signal Autopsy</button>
+    <span style="font-family:var(--mono);font-size:.62rem;color:var(--dim)" id="autopsy-ts"></span>
+  </div>
+  <div id="autopsy-headline" style="display:none;margin-bottom:20px">
+    <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:var(--r);padding:20px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Bullish Signal Accuracy — 7 Day Forward</div>
+        <div style="font-family:var(--mono);font-size:2.8rem;font-weight:300;color:var(--green);line-height:1" id="autopsy-pct">--</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px" id="autopsy-sub">of bullish signals were followed by a price increase within 7 days on Bitget</div>
+      </div>
+      <div style="margin-left:auto;display:flex;flex-direction:column;gap:12px">
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Days Analyzed</div>
+          <div style="font-family:var(--mono);font-size:1.4rem;color:var(--text)" id="autopsy-days">--</div>
         </div>
-        <div class="guide-card">
-          <div class="guide-type grid">Grid Trading</div>
-          <div class="guide-score-range">Score 35–65 &nbsp;|&nbsp; Sideways markets</div>
-          <div class="guide-desc">Use when market is ranging without a clear trend. Grid strategies profit from oscillation. If RSI is between 40–60 and funding rate is near zero, a Grid Playbook is ideal.</div>
-        </div>
-        <div class="guide-card">
-          <div class="guide-type trend">Trend-Following</div>
-          <div class="guide-score-range">Score 0–45 &nbsp;|&nbsp; Strong momentum</div>
-          <div class="guide-desc">Use when market is in a clear directional move. High RSI + high open interest + positive sentiment = trend is intact. Avoid DCA here; Trend-Following Playbook captures momentum instead.</div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Price Change Over Period</div>
+          <div style="font-family:var(--mono);font-size:1.4rem" id="autopsy-pricechange">--</div>
         </div>
       </div>
     </div>
+  </div>
+  <div id="autopsy-cards" style="display:none;margin-bottom:20px"></div>
+  <div id="autopsy-chart-wrap" style="display:none">
+    <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Price History With Signal Overlay &nbsp;<span style="color:var(--green)">&#9679; Bullish</span>&nbsp;<span style="color:var(--red)">&#9679; Bearish</span>&nbsp;<span style="color:var(--amber)">&#9679; Neutral</span></div>
+    <div style="position:relative;height:280px;margin-bottom:12px"><canvas id="autopsy-chart"></canvas></div>
+    <div style="font-family:var(--mono);font-size:.6rem;color:var(--dim);line-height:1.6">Note: Historical funding rate unavailable from Bitget public API. Autopsy uses RSI + Fear &amp; Greed only. Live signals additionally incorporate funding rate and open interest.</div>
+  </div>
+  <div id="autopsy-empty" style="font-family:var(--mono);font-size:.72rem;color:var(--dim);text-align:center;padding:24px 0">Hit "Run Signal Autopsy" to verify BEACON's accuracy against 90 days of real Bitget price history</div>
+</div>
 
-    <!-- ── FOOTER ─────────────────────────────────────────── -->
-    <footer>
-      <div class="footer-logo">BEACON</div>
-      <div class="footer-sub">Built for Bitget AI Hackathon Season 1 &nbsp;&middot;&nbsp; Trading Infra Track</div>
-      <div class="footer-links">
-        <a href="https://github.com/Argeneau12e" target="_blank">GitHub</a>
-        <a href="https://www.bitget.com/activity-hub/agent-hub" target="_blank">Bitget Agent Hub</a>
-        <a href="https://www.bitget.com/activity-hub/hackathon" target="_blank">Hackathon</a>
-      </div>
-    </footer>
+<div class="glass">
+  <div class="glass-ttl">How to Use With Bitget GetAgent Playbook</div>
+  <div class="guide-grid">
+    <div class="guide-card">
+      <div class="guide-type dca">DCA Strategy</div>
+      <div class="guide-range">Score 60-100 &nbsp;|&nbsp; Regime: Capitulation / Accumulation</div>
+      <div class="guide-desc">Use when Fear &amp; Greed is depressed and RSI is oversold. Configure GetAgent Playbook DCA at BEACON's recommended interval. Let the Entry Score confirm the window before subscribing.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-type grid">Grid Trading</div>
+      <div class="guide-range">Score 35-65 &nbsp;|&nbsp; Regime: Consolidation</div>
+      <div class="guide-desc">Use when market is ranging with low volatility and neutral sentiment. Grid strategies profit from oscillation. RSI between 40-60 and near-zero funding rate signal the ideal Grid Playbook window.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-type trend">Trend-Following</div>
+      <div class="guide-range">Score 0-45 &nbsp;|&nbsp; Regime: Expansion / Euphoria</div>
+      <div class="guide-desc">Use when momentum is strong and greed is elevated. High RSI plus positive open interest means trend is intact. Trend-Following Playbook captures the run without averaging against it.</div>
+    </div>
+  </div>
+</div>
 
-  </div><!-- .app -->
-
-
-  <script>
-    /* ─────────────────────────────────────────────────────────
-       STATE
-    ───────────────────────────────────────────────────────── */
-    let currentSymbol = 'BTCUSDT';
-    let currentSignals = null;
-    let btChart = null;
-
-    /* ─────────────────────────────────────────────────────────
-       ANIMATED BACKGROUND CANVAS (DCA_Claw visual DNA)
-    ───────────────────────────────────────────────────────── */
-    (function () {
-      const canvas = document.getElementById('bg-canvas');
-      const ctx    = canvas.getContext('2d');
-      const nodes  = [];
-      const COUNT  = 55;
-
-      function resize() {
-        canvas.width  = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      resize();
-      window.addEventListener('resize', resize);
-
-      for (let i = 0; i < COUNT; i++) {
-        nodes.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          r: Math.random() * 2 + 1,
-        });
-      }
-
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        nodes.forEach(n => {
-          n.x += n.vx; n.y += n.vy;
-          if (n.x < 0 || n.x > canvas.width)  n.vx *= -1;
-          if (n.y < 0 || n.y > canvas.height)  n.vy *= -1;
-
-          // node dot
-          ctx.beginPath();
-          ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(245,158,11,0.6)';
-          ctx.fill();
-
-          // edges
-          nodes.forEach(m => {
-            const dx = n.x - m.x, dy = n.y - m.y;
-            const d  = Math.sqrt(dx * dx + dy * dy);
-            if (d < 140) {
-              ctx.beginPath();
-              ctx.moveTo(n.x, n.y);
-              ctx.lineTo(m.x, m.y);
-              ctx.strokeStyle = `rgba(245,158,11,${(1 - d / 140) * 0.18})`;
-              ctx.lineWidth = 0.6;
-              ctx.stroke();
-            }
-          });
-        });
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
-
-    /* ─────────────────────────────────────────────────────────
-       UTILITIES
-    ───────────────────────────────────────────────────────── */
-    function fmtRSI(v)     { return v != null ? v.toFixed(1) : '--'; }
-    function fmtFR(v)      { return v != null ? (v * 100).toFixed(4) + '%' : '--'; }
-    function fmtFG(v)      { return v != null ? String(v) : '--'; }
-    function fmtOI(v)      {
-      if (v == null) return '--';
-      if (v >= 1e9)  return (v / 1e9).toFixed(2) + 'B';
-      if (v >= 1e6)  return (v / 1e6).toFixed(1) + 'M';
-      return v.toFixed(0);
-    }
-    function fmtDate(ts)   { return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric' }); }
-    function now()         { return new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }); }
-
-    function rsiClass(v) {
-      if (v <= 30) return 'bullish';
-      if (v >= 70) return 'bearish';
-      return 'neutral';
-    }
-    function rsiLabel(v) {
-      if (v <= 30) return 'Oversold — Strong Entry';
-      if (v <= 45) return 'Approaching Oversold';
-      if (v <= 55) return 'Neutral';
-      if (v < 70)  return 'Approaching Overbought';
-      return 'Overbought — Avoid Entry';
-    }
-
-    function frClass(v) {
-      if (v == null) return 'neutral';
-      if (v < -0.0001) return 'bullish';
-      if (v > 0.0004)  return 'bearish';
-      return 'neutral';
-    }
-    function frLabel(v) {
-      if (v == null)    return 'Unavailable';
-      if (v < -0.0001)  return 'Negative — Bullish Lean';
-      if (v < 0.0002)   return 'Near Zero — Neutral';
-      if (v < 0.0004)   return 'Positive — Watch Closely';
-      return 'High Positive — Crowded Longs';
-    }
-
-    function fgClass(v) {
-      if (v <= 25) return 'bullish';
-      if (v >= 65) return 'bearish';
-      return 'neutral';
-    }
-    function fgLabel(v) {
-      if (v <= 25)  return 'Extreme Fear — Best DCA Zone';
-      if (v <= 45)  return 'Fear — Good DCA Conditions';
-      if (v <= 55)  return 'Neutral';
-      if (v <= 75)  return 'Greed — Use Caution';
-      return 'Extreme Greed — Poor DCA Timing';
-    }
-
-    function scoreClass(s) {
-      if (s >= 65) return 'high';
-      if (s >= 40) return 'mid';
-      return 'low';
-    }
-    function scoreLabel(s) {
-      if (s >= 65) return 'Strong Entry Conditions';
-      if (s >= 40) return 'Moderate Conditions';
-      return 'Poor Entry Conditions';
-    }
-    function scoreDesc(s) {
-      if (s >= 65) return 'Multiple signals align for DCA. Consider starting or increasing your Bitget GetAgent Playbook DCA position.';
-      if (s >= 40) return 'Conditions are mixed. A conservative DCA with reduced amounts is reasonable.';
-      return 'Signals suggest caution. Consider pausing or reducing DCA activity. Grid or Trend-Following may be better.';
-    }
-
-    function detectPlaybook(text) {
-      const t = (text || '').toLowerCase();
-      if (t.includes('trend'))  return 'Trend-Following Playbook';
-      if (t.includes('grid'))   return 'Grid Trading Playbook';
-      return 'DCA Playbook';
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       UPDATE SIGNAL CARDS
-    ───────────────────────────────────────────────────────── */
-    function updateSignalCards(s) {
-      // RSI
-      setCard('rsi', fmtRSI(s.rsi), rsiLabel(s.rsi), rsiClass(s.rsi));
-
-      // Funding Rate
-      setCard('funding', fmtFR(s.fundingRate), frLabel(s.fundingRate), frClass(s.fundingRate));
-
-      // Fear & Greed
-      const fgLbl = s.fearGreedLabel
-        ? `${fgLabel(s.fearGreed)} (${s.fearGreedLabel})`
-        : fgLabel(s.fearGreed);
-      setCard('fg', fmtFG(s.fearGreed), fgLbl, fgClass(s.fearGreed));
-
-      // Open Interest
-      const oiCls = s.oiChange > 0 ? 'bullish' : s.oiChange < 0 ? 'bearish' : 'neutral';
-      const oiLbl = 'Futures Positioning (Live)';
-      setCard('oi', fmtOI(s.oiChange), oiLbl, 'neutral');
-    }
-
-    function setCard(id, value, status, cls) {
-      const card = document.getElementById(id + '-card');
-      const val  = document.getElementById(id + '-value');
-      const lbl  = document.getElementById(id + '-status');
-      card.className = 'signal-card ' + cls;
-      val.textContent  = value;
-      lbl.textContent  = status;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       UPDATE SCORE GAUGE
-    ───────────────────────────────────────────────────────── */
-    function updateScore(score) {
-      const ring = document.getElementById('gauge-ring');
-      const num  = document.getElementById('score-number');
-      const lbl  = document.getElementById('score-label');
-      const desc = document.getElementById('score-desc');
-
-      const circ = 502.65;
-      const fill = (score / 100) * circ;
-      ring.style.strokeDasharray = `${fill} ${circ}`;
-
-      const cls = scoreClass(score);
-      const colorMap = { high: '#10b981', mid: '#f59e0b', low: '#f43f5e' };
-      ring.style.stroke = colorMap[cls];
-
-      num.textContent = score;
-      num.className   = cls;
-      lbl.textContent  = scoreLabel(score);
-      lbl.style.color  = colorMap[cls];
-      desc.textContent = scoreDesc(score);
-
-      document.getElementById('last-updated').textContent = 'Updated ' + now();
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       LOAD SIGNALS  (/api/signals)
-    ───────────────────────────────────────────────────────── */
-    async function loadSignals() {
-      try {
-        const res  = await fetch(`/api/signals?symbol=${currentSymbol}`);
-        const data = await res.json();
-        currentSignals = data;
-        updateSignalCards(data);
-        updateScore(data.dcaScore);
-        return data;
-      } catch (e) {
-        console.error('Signals error:', e);
-        document.getElementById('ai-text').textContent = 'Could not reach server. Make sure node server.js is running.';
-        return null;
-      }
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       LOAD AI ANALYSIS  (/api/analyze)
-    ───────────────────────────────────────────────────────── */
-    async function loadAnalysis(signals) {
-      const aiText = document.getElementById('ai-text');
-      aiText.className = 'loading-text';
-      aiText.textContent = 'Reading signals and generating analysis...';
-
-      try {
-        const res  = await fetch('/api/analyze', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(signals),
-        });
-        const data = await res.json();
-        aiText.className   = '';
-        aiText.textContent = data.analysis;
-
-        const playbook = detectPlaybook(data.analysis);
-        document.getElementById('playbook-type').textContent = playbook;
-      } catch (e) {
-        aiText.textContent = 'AI analysis unavailable. Check GROQ_API_KEY in your .env file.';
-      }
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       RUN BACKTEST  (/api/backtest)
-    ───────────────────────────────────────────────────────── */
-    async function runBacktest() {
-      const btn     = document.getElementById('run-btn');
-      const btPair  = document.getElementById('bt-pair').value;
-      const interval= parseInt(document.getElementById('bt-interval').value);
-
-      btn.disabled = true;
-      btn.textContent = 'Running...';
-
-      try {
-        // Fetch candles and fear & greed in parallel
-        const [candleRes, fgRes] = await Promise.all([
-          fetch(`/api/candles?symbol=${btPair}&granularity=1D&limit=90`),
-          fetch('/api/fear-greed'),
-        ]);
-        const candleData = await candleRes.json();
-        const fgData     = await fgRes.json();
-
-        const candles = candleData?.data;
-        const fg      = fgData?.data;
-
-        if (!candles || candles.length < 15) {
-          alert('Not enough candle data from Bitget. Try again in a moment.');
-          return;
-        }
-
-        // Send to backtest engine
-        const btRes  = await fetch('/api/backtest', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ candles, fearGreedHistory: fg, amount: 100, interval }),
-        });
-        const result = await btRes.json();
-
-        updateBacktestStats(result);
-        drawBacktestChart(result);
-      } catch (e) {
-        console.error('Backtest error:', e);
-        alert('Backtest failed. Check the console for details.');
-      } finally {
-        btn.disabled    = false;
-        btn.textContent = 'Run Backtest';
-      }
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       UPDATE BACKTEST STAT CARDS
-    ───────────────────────────────────────────────────────── */
-    function updateBacktestStats(result) {
-      const { plain, smart } = result;
-
-      const pRet = document.getElementById('plain-return');
-      const sRet = document.getElementById('smart-return');
-      pRet.textContent = (plain.returnPct >= 0 ? '+' : '') + plain.returnPct + '%';
-      sRet.textContent = (smart.returnPct >= 0 ? '+' : '') + smart.returnPct + '%';
-      pRet.className   = 'stat-val ' + (plain.returnPct >= 0 ? 'positive' : 'negative');
-      sRet.className   = 'stat-val ' + (smart.returnPct >= 0 ? 'positive' : 'negative');
-
-      document.getElementById('plain-buys').textContent = plain.totalBuys + ' buys';
-      document.getElementById('smart-buys').textContent = smart.totalBuys + ' buys';
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       DRAW CHART.JS BACKTEST CHART
-    ───────────────────────────────────────────────────────── */
-    function drawBacktestChart(result) {
-      const { plain, smart } = result;
-
-      const labels   = plain.values.map(p => fmtDate(p.t));
-      const plainVals = plain.values.map(p => p.v);
-      const smartVals = smart.values.map(p => p.v);
-
-      if (btChart) btChart.destroy();
-
-      const ctx = document.getElementById('backtest-chart').getContext('2d');
-      btChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label:           'Plain DCA',
-              data:            plainVals,
-              borderColor:     '#f59e0b',
-              backgroundColor: 'rgba(245,158,11,0.05)',
-              borderWidth:     1.8,
-              pointRadius:     0,
-              tension:         0.3,
-              fill:            true,
-            },
-            {
-              label:           'Smart DCA',
-              data:            smartVals,
-              borderColor:     '#10b981',
-              backgroundColor: 'rgba(16,185,129,0.07)',
-              borderWidth:     2,
-              pointRadius:     0,
-              tension:         0.3,
-              fill:            true,
-            },
-          ],
-        },
-        options: {
-          responsive:          true,
-          maintainAspectRatio: false,
-          interaction:         { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: '#18171f',
-              borderColor:     'rgba(255,255,255,0.08)',
-              borderWidth:     1,
-              titleColor:      '#7a756d',
-              bodyColor:       '#f0ede8',
-              titleFont:       { family: "'IBM Plex Mono'", size: 10 },
-              bodyFont:        { family: "'IBM Plex Mono'", size: 12 },
-              callbacks: {
-                label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`,
-              },
-            },
-          },
-          scales: {
-            x: {
-              grid:     { color: 'rgba(255,255,255,0.04)' },
-              ticks:    { color: '#3f3c38', font: { family: "'IBM Plex Mono'", size: 9 }, maxTicksLimit: 8 },
-              border:   { color: 'rgba(255,255,255,0.06)' },
-            },
-            y: {
-              grid:     { color: 'rgba(255,255,255,0.04)' },
-              ticks:    { color: '#3f3c38', font: { family: "'IBM Plex Mono'", size: 9 }, callback: v => '$' + v.toFixed(0) },
-              border:   { color: 'rgba(255,255,255,0.06)' },
-            },
-          },
-        },
+<footer>
+  <div class="ft-logo">BEACON</div>
+  <div class="ft-sub">Built for Bitget AI Hackathon Season 1 &nbsp;&middot;&nbsp; Trading Infrastructure Track &nbsp;&middot;&nbsp; June 2026</div>
+  <div class="ft-links">
+    <a href="https://github.com/Argeneau12e" target="_blank">GitHub</a>
+    <a href="https://www.bitget.com/activity-hub/agent-hub" target="_blank">Bitget Agent Hub</a>
+    <a href="https://www.bitget.com/activity-hub/hackathon" target="_blank">Hackathon</a>
+  </div>
+</footer>
+</div>
+<script>
+// ── CANVAS BACKGROUND ──────────────────────────────────────────────────────
+(function(){
+  const cv=document.getElementById('bg-canvas'),ctx=cv.getContext('2d');
+  const N=60,nodes=[];
+  function resize(){cv.width=innerWidth;cv.height=innerHeight}
+  resize();addEventListener('resize',resize);
+  for(let i=0;i<N;i++)nodes.push({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.8+.8});
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    nodes.forEach(n=>{
+      n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>cv.width)n.vx*=-1;
+      if(n.y<0||n.y>cv.height)n.vy*=-1;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(245,158,11,.55)';ctx.fill();
+      nodes.forEach(m=>{
+        const dx=n.x-m.x,dy=n.y-m.y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<150){ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(m.x,m.y);
+          ctx.strokeStyle=`rgba(245,158,11,${(1-d/150)*.15})`;ctx.lineWidth=.5;ctx.stroke()}
       });
-    }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
 
-    /* ─────────────────────────────────────────────────────────
-       REFRESH BUTTON STATE
-    ───────────────────────────────────────────────────────── */
-    function setRefreshing(v) {
-      document.getElementById('spin-icon').style.display    = v ? 'inline-block' : 'none';
-      document.getElementById('refresh-icon').style.display = v ? 'none' : 'inline-block';
-      document.getElementById('refresh-btn').classList.toggle('loading', v);
-    }
+// ── STATE ──────────────────────────────────────────────────────────────────
+let sym='BTCUSDT',lastConfig=null,btChart=null,autopsyChart=null;
+const TIER_COLOR={bullish:'var(--green)',neutral:'var(--amber)',bearish:'var(--red)'};
+const RANK_MEDAL=['🥇','🥈','🥉','4th','5th'];
 
-    /* ─────────────────────────────────────────────────────────
-       PAIR CHANGE
-    ───────────────────────────────────────────────────────── */
-    function handlePairChange(val) {
-      currentSymbol = val;
-      loadAll();
-    }
+// ── UTILS ──────────────────────────────────────────────────────────────────
+const sign=v=>v>=0?'+':'';
+const nowStr=()=>new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+const fmtDate=ts=>new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+function fmtOI(v){if(!v&&v!==0)return '--';if(v>=1e9)return(v/1e9).toFixed(2)+'B';if(v>=1e6)return(v/1e6).toFixed(1)+'M';return v.toFixed(0)}
 
-    /* ─────────────────────────────────────────────────────────
-       LOAD ALL — main entry point called on page load + refresh
-    ───────────────────────────────────────────────────────── */
-    async function loadAll() {
-      setRefreshing(true);
-      const signals = await loadSignals();
-      if (signals) await loadAnalysis(signals);
-      setRefreshing(false);
-    }
+// ── REGIME BANNER ──────────────────────────────────────────────────────────
+function setRegime(r){
+  const cm={bullish:'#10b981',neutral:'#f59e0b',bearish:'#f43f5e'};
+  const rm={bullish:'16,185,129',neutral:'245,158,11',bearish:'244,63,94'};
+  const c=cm[r.tier]||'#7a756d';
+  const banner=document.getElementById('regime-banner');
+  banner.style.setProperty('--regime-color',c);
+  banner.style.setProperty('--regime-rgb',rm[r.tier]||'255,255,255');
+  document.getElementById('regime-dot').style.cssText=`background:${c};box-shadow:0 0 8px ${c}`;
+  document.getElementById('regime-name').textContent=r.name;
+  document.getElementById('regime-label').textContent=r.label;
+  document.getElementById('regime-desc').textContent=r.desc;
+  document.getElementById('regime-playbook').textContent='Playbook recommendation: '+r.playbook;
+}
 
-    /* ─────────────────────────────────────────────────────────
-       INIT
-    ───────────────────────────────────────────────────────── */
-    loadAll();
+// ── SIGNAL CARDS ──────────────────────────────────────────────────────────
+function setCard(id,val,lbl,cls){
+  document.getElementById(id+'-card').className='signal-card '+cls;
+  document.getElementById(id+'-val').textContent=val;
+  document.getElementById(id+'-lbl').textContent=lbl;
+}
+function applySignals(s){
+  const rsiCls=s.rsi<=30?'bullish':s.rsi>=70?'bearish':'neutral';
+  const rsiLbl=s.rsi<=30?'Oversold — Strong Entry':s.rsi<=45?'Approaching Oversold':s.rsi<70?'Neutral Momentum':'Overbought — Avoid';
+  setCard('rsi',s.rsi?.toFixed(1)??'--',rsiLbl,rsiCls);
+  const fr=parseFloat(s.fundingRate??0);
+  const frCls=fr<-0.0001?'bullish':fr>0.0004?'bearish':'neutral';
+  const frLbl=fr<-0.0001?'Negative — Bullish Lean':fr<0.0002?'Near Zero — Neutral':fr<0.0004?'Positive — Watch':'High — Crowded Longs';
+  setCard('fr',s.fundingRate!=null?(fr*100).toFixed(4)+'%':'--',frLbl,frCls);
+  const fg=parseInt(s.fearGreed??50);
+  const fgCls=fg<=25?'bullish':fg>=65?'bearish':'neutral';
+  const fgLbl=fg<=25?'Extreme Fear — Best DCA':fg<=45?'Fear — Good Conditions':fg<=55?'Neutral':fg<=75?'Greed — Use Caution':'Extreme Greed — Avoid';
+  setCard('fg',String(fg),`${fgLbl} (${s.fearGreedLabel||''})`,fgCls);
+  setCard('oi',fmtOI(s.oiValue),'Futures Positioning (Live)','neutral');
+  const vol=parseFloat(s.volatility??0);
+  const volCls=vol>=1&&vol<=3?'bullish':vol>5?'bearish':'neutral';
+  const volLbl=vol<1?'Very Low — Low Conviction':vol<=3?'Moderate — Ideal DCA':vol<=5?'Elevated — Reduce Size':'High — Small Frequent Buys';
+  setCard('vol',vol.toFixed(2)+'%',volLbl,volCls);
+}
 
-    // Auto-refresh every 5 minutes
-    setInterval(loadAll, 5 * 60 * 1000);
-  </script>
+// ── SCORE GAUGE ───────────────────────────────────────────────────────────
+function setScore(s){
+  const ring=document.getElementById('gauge-ring');
+  const num=document.getElementById('score-num');
+  const lbl=document.getElementById('score-lbl');
+  ring.style.strokeDasharray=`${(s/100)*502.65} 502.65`;
+  const cls=s>=65?'high':s>=40?'mid':'low';
+  const colors={high:'#10b981',mid:'#f59e0b',low:'#f43f5e'};
+  const labels={high:'Strong Entry Conditions',mid:'Moderate Conditions',low:'Poor Entry Conditions'};
+  ring.style.stroke=colors[cls];
+  num.textContent=s;num.className=cls;
+  lbl.textContent=labels[cls];lbl.style.color=colors[cls];
+  document.getElementById('last-upd').textContent='Updated '+nowStr();
+}
+function setInterval_(iv){
+  if(!iv)return;
+  document.getElementById('score-interval').innerHTML=
+    `<span style="color:var(--amber)">Recommended: ${iv.label}</span><br><span style="font-size:.6rem">${iv.reason}</span>`;
+}
+
+// ── PLAYBOOK CONFIG ───────────────────────────────────────────────────────
+function applyConfig(pb){
+  if(!pb)return;
+  lastConfig=pb;
+  const cc=pb.confidence==='HIGH'?'v-green':pb.confidence==='MEDIUM'?'v-amber':'v-red';
+  const map={
+    'cfg-strategy':'strategy','cfg-pair':'pair','cfg-amount':'amountPerCycle',
+    'cfg-freq':'frequency','cfg-entry':'entryCondition','cfg-pause':'pauseCondition',
+    'cfg-regime':'regime','cfg-reason':'optimizerReason',
+  };
+  for(const[id,key]of Object.entries(map)){
+    const el=document.getElementById(id);if(el)el.textContent=pb[key]||'--';
+  }
+  const conf=document.getElementById('cfg-confidence');
+  if(conf){conf.className='config-val '+cc;conf.textContent=pb.confidence||'--';}
+  const ts=document.getElementById('cfg-ts');
+  if(ts)ts.textContent=pb.generatedAt?new Date(pb.generatedAt).toLocaleString():'--';
+}
+function copyConfig(){
+  if(!lastConfig)return;
+  const txt=Object.entries(lastConfig).map(([k,v])=>`${k}: ${v}`).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.querySelector('.btn-copy');
+    btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy Configuration',1800);
+  });
+}
+
+// ── LOAD SIGNALS ──────────────────────────────────────────────────────────
+async function loadSignals(){
+  try{
+    const d=await fetch(`/api/signals?symbol=${sym}`).then(r=>r.json());
+    applySignals(d);setScore(d.dcaScore);setInterval_(d.interval);
+    if(d.regime)setRegime(d.regime);
+    if(d.playbook)applyConfig(d.playbook);
+    return d;
+  }catch(e){
+    document.getElementById('ai-text').textContent='Cannot reach server. Run: node server.js';
+    return null;
+  }
+}
+
+// ── AI ANALYSIS ───────────────────────────────────────────────────────────
+async function loadAnalysis(s){
+  const el=document.getElementById('ai-text');
+  el.className='loading';el.textContent='Generating AI analysis...';
+  try{
+    const d=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}).then(r=>r.json());
+    el.className='';el.textContent=d.analysis;
+    const t=(d.analysis||'').toLowerCase();
+    document.getElementById('pb-type').textContent=
+      t.includes('trend')?'Trend-Following Playbook':t.includes('grid')?'Grid Trading Playbook':'DCA Playbook';
+  }catch(e){el.textContent='AI unavailable. Check GROQ_API_KEY in .env.';}
+}
+
+// ── BACKTEST ──────────────────────────────────────────────────────────────
+async function runBacktest(){
+  const btn=document.getElementById('run-btn');
+  const btPair=document.getElementById('bt-pair').value;
+  const intv=parseInt(document.getElementById('bt-interval').value);
+  btn.disabled=true;btn.textContent='Running...';
+  try{
+    const[cr,fr]=await Promise.all([
+      fetch(`/api/candles?symbol=${btPair}&granularity=1day&limit=90`),
+      fetch('/api/fear-greed'),
+    ]);
+    const cd=await cr.json(),fd=await fr.json();
+    const candles=cd?.data,fg=fd?.data;
+    if(!candles||candles.length<15){alert('Not enough data from Bitget. Retry in a moment.');return;}
+    const res=await fetch('/api/backtest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({candles,fearGreedHistory:fg,amount:100,interval:intv,symbol:btPair})}).then(r=>r.json());
+    if(res.error){alert(res.error);return;}
+    updateBtStats(res);drawBtChart(res);
+  }catch(e){console.error(e);alert('Backtest failed.');}
+  finally{btn.disabled=false;btn.textContent='Run Backtest';}
+}
+function updateBtStats(d){
+  const{plain,smart}=d;
+  const pR=document.getElementById('plain-ret'),sR=document.getElementById('smart-ret');
+  pR.textContent=sign(plain.returnPct)+plain.returnPct+'%';
+  sR.textContent=sign(smart.returnPct)+smart.returnPct+'%';
+  pR.className='stat-v '+(plain.returnPct>=0?'pos':'neg');
+  sR.className='stat-v '+(smart.returnPct>=0?'pos':'neg');
+  document.getElementById('plain-sharpe').textContent=plain.sharpe?.toFixed(3)??'--';
+  document.getElementById('smart-sharpe').textContent=smart.sharpe?.toFixed(3)??'--';
+  document.getElementById('plain-dd').textContent='-'+plain.maxDrawdown+'%';
+  document.getElementById('smart-dd').textContent='-'+smart.maxDrawdown+'%';
+}
+function drawBtChart(d){
+  const{plain,smart}=d;
+  const labels=plain.values.map(p=>fmtDate(p.t));
+  if(btChart)btChart.destroy();
+  const ctx=document.getElementById('bt-chart').getContext('2d');
+  btChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {label:'Plain DCA',data:plain.values.map(p=>p.v),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.05)',borderWidth:1.8,pointRadius:0,tension:.3,fill:true},
+    {label:'Smart DCA',data:smart.values.map(p=>p.v),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.07)',borderWidth:2.2,pointRadius:0,tension:.3,fill:true},
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#18171f',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#7a756d',bodyColor:'#f0ede8',titleFont:{family:"'IBM Plex Mono'",size:10},bodyFont:{family:"'IBM Plex Mono'",size:12},callbacks:{label:c=>` ${c.dataset.label}: $${c.parsed.y.toFixed(2)}`}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3f3c38',font:{family:"'IBM Plex Mono'",size:9},maxTicksLimit:8},border:{color:'rgba(255,255,255,.06)'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3f3c38',font:{family:"'IBM Plex Mono'",size:9},callback:v=>'$'+v.toFixed(0)},border:{color:'rgba(255,255,255,.06)'}}}}});
+}
+
+// ── MULTI-PAIR RADAR ──────────────────────────────────────────────────────
+async function runRadar(){
+  const btn=document.getElementById('radar-btn');
+  btn.disabled=true;btn.textContent='Scanning all pairs...';
+  document.getElementById('radar-empty').style.display='none';
+  try{
+    const data=await fetch('/api/radar').then(r=>r.json());
+    renderRadar(data);
+    document.getElementById('radar-ts').textContent='Last scanned: '+new Date(data.timestamp).toLocaleTimeString();
+  }catch(e){
+    document.getElementById('radar-empty').textContent='Scan failed — ensure server is running.';
+    document.getElementById('radar-empty').style.display='block';
+  }finally{btn.disabled=false;btn.textContent='Run Radar Scan';}
+}
+function renderRadar(data){
+  const{pairs}=data;
+  const table=document.getElementById('radar-table');
+  table.style.display='block';
+  const rows=pairs.map((p,i)=>{
+    const c=TIER_COLOR[p.regime.tier]||'var(--muted)';
+    const raw=c.replace('var(--green)','16,185,129').replace('var(--amber)','245,158,11').replace('var(--red)','244,63,94').replace('var(--muted)','122,117,109');
+    const top=i===0;
+    const fr=p.fundingRate!=null?(p.fundingRate*100).toFixed(4)+'%':'N/A';
+    const frColor=(p.fundingRate||0)<0?'var(--green)':(p.fundingRate||0)>0.0003?'var(--red)':'var(--text)';
+    const rsiColor=p.rsi<30?'var(--green)':p.rsi>70?'var(--red)':'var(--text)';
+    const best=top?` <span style="font-size:.56rem;padding:1px 7px;border-radius:10px;background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.25);font-weight:500;vertical-align:middle">BEST ENTRY</span>`:'';
+    return `<div style="display:grid;grid-template-columns:44px 1fr 200px 90px 90px 1fr;gap:12px;align-items:center;padding:14px 16px;border-radius:10px;border:1px solid ${top?`rgba(${raw},.35)`:'var(--border)'};background:${top?`rgba(${raw},.05)`:'transparent'};margin-bottom:8px">
+      <div style="font-size:1.1rem;text-align:center">${RANK_MEDAL[i]}</div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.75rem;font-weight:500;color:var(--text);margin-bottom:5px">${p.display}${best}</div>
+        <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;width:130px">
+          <div style="height:100%;width:${p.dcaScore}%;background:${c};border-radius:3px;transition:width 1.2s ease"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:var(--mono);font-size:1.4rem;font-weight:300;color:${c}">${p.dcaScore}</span>
+        <span style="font-family:var(--mono);font-size:.58rem;padding:3px 8px;border-radius:20px;border:1px solid rgba(${raw},.35);color:${c};white-space:nowrap">${p.regime.name}</span>
+      </div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:${rsiColor}">${p.rsi.toFixed(1)}</div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:${frColor}">${fr}</div>
+      <div style="font-family:var(--mono);font-size:.64rem;color:var(--muted);line-height:1.5">${p.regime.playbook}</div>
+    </div>`;
+  }).join('');
+  const hdr=`<div style="display:grid;grid-template-columns:44px 1fr 200px 90px 90px 1fr;gap:12px;padding:4px 16px 10px;border-bottom:1px solid var(--border);margin-bottom:10px">${['Rank','Pair / Score Bar','Score / Regime','RSI','Funding','Recommendation'].map(h=>`<div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">${h}</div>`).join('')}</div>`;
+  const fgColor=data.fearGreed<=35?'var(--green)':data.fearGreed>=65?'var(--red)':'var(--amber)';
+  const footer=`<div style="margin-top:12px;padding:10px 16px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:var(--rs);display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:.6rem;color:var(--muted)">Market-wide Fear &amp; Greed:</span><span style="font-family:var(--mono);font-size:.68rem;color:${fgColor};font-weight:500">${data.fearGreed} — ${data.fearGreedLabel}</span><span style="font-family:var(--mono);font-size:.56rem;color:var(--dim)">Identical across all pairs. Fetched once.</span></div>`;
+  table.innerHTML=hdr+rows+footer;
+}
+
+// ── SIGNAL AUTOPSY ────────────────────────────────────────────────────────
+async function runAutopsy(){
+  const btn=document.getElementById('autopsy-btn');
+  const pair=document.getElementById('autopsy-pair').value;
+  btn.disabled=true;btn.textContent='Crunching 90 days of real Bitget data...';
+  ['autopsy-headline','autopsy-cards','autopsy-chart-wrap','autopsy-empty'].forEach(id=>document.getElementById(id).style.display='none');
+  try{
+    const data=await fetch(`/api/autopsy?symbol=${pair}`).then(r=>r.json());
+    if(data.error){alert(data.error);return;}
+    renderAutopsyHeadline(data);
+    renderAutopsyCards(data);
+    renderAutopsyChart(data,pair);
+    document.getElementById('autopsy-ts').textContent='Analyzed: '+new Date(data.timestamp).toLocaleTimeString();
+  }catch(e){
+    console.error(e);
+    const emp=document.getElementById('autopsy-empty');
+    emp.textContent='Autopsy failed — check server console.';emp.style.display='block';
+  }finally{btn.disabled=false;btn.textContent='Run Signal Autopsy';}
+}
+function renderAutopsyHeadline(data){
+  const{summary}=data;
+  document.getElementById('autopsy-headline').style.display='block';
+  document.getElementById('autopsy-pct').textContent=summary.bullishAccuracy7d!=null?summary.bullishAccuracy7d+'%':'N/A';
+  document.getElementById('autopsy-sub').textContent=`of BEACON's bullish signals were followed by a price increase within 7 days — verified across ${summary.bullishSignalsIssued} signal days on real Bitget ${data.symbol} data`;
+  document.getElementById('autopsy-days').textContent=summary.totalDaysAnalyzed;
+  const pc=summary.priceChange;
+  const pcEl=document.getElementById('autopsy-pricechange');
+  pcEl.textContent=(pc>=0?'+':'')+pc+'%';pcEl.style.color=pc>=0?'var(--green)':'var(--red)';
+}
+function renderAutopsyCards(data){
+  const{accuracy}=data;
+  document.getElementById('autopsy-cards').style.display='block';
+  const ORDER=['CAPITULATION','ACCUMULATION','EXPANSION','CONSOLIDATION','NEUTRAL','DISTRIBUTION','EUPHORIA'];
+  const COLORS={CAPITULATION:'var(--green)',ACCUMULATION:'var(--green)',EXPANSION:'var(--amber)',CONSOLIDATION:'var(--amber)',NEUTRAL:'var(--amber)',DISTRIBUTION:'var(--red)',EUPHORIA:'var(--red)'};
+  const ICONS={CAPITULATION:'↑↑',ACCUMULATION:'↑',EXPANSION:'→↑',CONSOLIDATION:'↔',NEUTRAL:'→',DISTRIBUTION:'↓',EUPHORIA:'↓↓'};
+  const cards=ORDER.filter(n=>accuracy[n]).map(name=>{
+    const a=accuracy[name];const c=COLORS[name];
+    const r7=(a.avgReturn7d>=0?'+':'')+a.avgReturn7d+'%';
+    const r14=(a.avgReturn14d>=0?'+':'')+a.avgReturn14d+'%';
+    const dir=a.isBullish?'Price rose':a.isBearish?'Price fell':'No major loss';
+    return `<div style="background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${c}"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+        <div><div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c};margin-bottom:3px">${ICONS[name]} ${name}</div><div style="font-size:.7rem;color:var(--muted)">${a.count} day${a.count!==1?'s':''} detected</div></div>
+        <div style="font-family:var(--mono);font-size:2rem;font-weight:300;color:${c};line-height:1">${a.hitRate7d!=null?a.hitRate7d+'%':'N/A'}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-family:var(--mono)">
+        ${[['7d Accuracy',a.hitRate7d+'%',c,dir+' in '+a.hitRate7d+'% of cases'],['14d Accuracy',a.hitRate14d+'%',c,dir+' in '+a.hitRate14d+'% of cases'],['Avg 7d Return',r7,a.avgReturn7d>=0?'var(--green)':'var(--red)',''],['Avg 14d Return',r14,a.avgReturn14d>=0?'var(--green)':'var(--red)','']].map(([label,val,color,sub])=>`<div style="background:rgba(255,255,255,.03);border-radius:6px;padding:8px"><div style="font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">${label}</div><div style="font-size:.88rem;color:${color}">${val}</div>${sub?`<div style="font-size:.56rem;color:var(--dim);margin-top:2px">${sub}</div>`:''}</div>`).join('')}
+      </div></div>`;
+  }).join('');
+  document.getElementById('autopsy-cards').innerHTML=`<div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Regime-by-Regime Accuracy Breakdown</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">${cards}</div>`;
+}
+function renderAutopsyChart(data,symbol){
+  document.getElementById('autopsy-chart-wrap').style.display='block';
+  const history=data.signalHistory;
+  const labels=history.map(d=>fmtDate(d.timestamp));
+  const prices=history.map(d=>d.price);
+  const bullPts=history.map((d,i)=>d.tier==='bullish'?{x:i,y:d.price}:null).filter(Boolean);
+  const bearPts=history.map((d,i)=>d.tier==='bearish'?{x:i,y:d.price}:null).filter(Boolean);
+  const neutPts=history.map((d,i)=>d.tier==='neutral'?{x:i,y:d.price}:null).filter(Boolean);
+  if(autopsyChart)autopsyChart.destroy();
+  const ctx=document.getElementById('autopsy-chart').getContext('2d');
+  autopsyChart=new Chart(ctx,{data:{labels,datasets:[
+    {type:'line',label:symbol.replace('USDT','/USDT')+' Price',data:prices,borderColor:'rgba(255,255,255,.18)',borderWidth:1.5,pointRadius:0,tension:.3,fill:false,order:2},
+    {type:'scatter',label:'Bullish Signal',data:bullPts,backgroundColor:'rgba(16,185,129,.85)',borderColor:'rgba(16,185,129,1)',pointRadius:7,pointHoverRadius:10,order:1},
+    {type:'scatter',label:'Bearish Signal',data:bearPts,backgroundColor:'rgba(244,63,94,.85)',borderColor:'rgba(244,63,94,1)',pointRadius:7,pointHoverRadius:10,order:1},
+    {type:'scatter',label:'Neutral Signal',data:neutPts,backgroundColor:'rgba(245,158,11,.55)',borderColor:'rgba(245,158,11,.8)',pointRadius:4,pointHoverRadius:7,order:1},
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:true},
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#7a756d',font:{family:"'IBM Plex Mono'",size:10},boxWidth:10,padding:16}},
+      tooltip:{backgroundColor:'#18171f',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#7a756d',bodyColor:'#f0ede8',titleFont:{family:"'IBM Plex Mono'",size:10},bodyFont:{family:"'IBM Plex Mono'",size:11},
+        callbacks:{title:items=>labels[items[0].dataIndex]||'',label:item=>{
+          if(item.datasetIndex===0)return ` Price: $${item.parsed.y.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+          const d=history[item.raw.x];if(!d)return '';
+          return [` Regime: ${d.regime}  |  RSI: ${d.rsi}  F&G: ${d.fearGreed}`,` 7-day return after signal: ${d.return7d>=0?'+':''}${d.return7d}%`,` 14-day return after signal: ${d.return14d>=0?'+':''}${d.return14d}%`];
+        }}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3f3c38',font:{family:"'IBM Plex Mono'",size:9},maxTicksLimit:10},border:{color:'rgba(255,255,255,.06)'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3f3c38',font:{family:"'IBM Plex Mono'",size:9},callback:v=>'$'+v.toLocaleString()},border:{color:'rgba(255,255,255,.06)'}}}}});
+}
+
+// ── CORE LOAD ─────────────────────────────────────────────────────────────
+function handlePair(v){sym=v;loadAll();}
+function setRefreshing(v){document.getElementById('refresh-btn').classList.toggle('spinning',v);}
+async function loadAll(){
+  setRefreshing(true);
+  const s=await loadSignals();
+  if(s)await loadAnalysis(s);
+  setRefreshing(false);
+}
+loadAll();
+setInterval(loadAll,5*60*1000);
+</script>
 </body>
 </html>
