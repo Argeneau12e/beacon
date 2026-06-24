@@ -1,21 +1,20 @@
 {
   "_meta": {
-    "captured": "2026-06-21T22:34:27.536Z",
+    "captured": "2026-06-24T09:59:07.288Z",
     "source": "BEACON live API — auto-logged by server.js",
-    "description": "Real response from analysis endpoint"
+    "description": "Real response captured from analysis endpoint"
   },
   "request": {
     "symbol": "BTCUSDT",
-    "rsi": 49.56,
-    "fundingRate": 0.000002,
-    "fearGreed": 23,
-    "volatility": 2.582,
-    "dcaScore": 84,
+    "rsi": 50.23,
+    "fundingRate": 0.000066,
+    "fearGreed": 17,
+    "volatility": 2.627,
+    "dcaScore": 80,
     "regime": "NEUTRAL"
   },
   "response": {
-    "analysis": "The current NEUTRAL market regime and signals indicate a mixed and uncertain environment, where neither strong buying nor selling pressure is evident, suggesting a cautious approach to market participation. This is a moderate moment to DCA, as the signals are not strongly aligned in any direction, but the RSI and Fear & Greed indicators suggest some potential for a bullish move, while the Funding Rate and Daily Volatility suggest caution. In this scenario, Bitget's GetAgent Playbook recommends using the \"Neutral Zone\" strategy, with a standard DCA allocation of 80% of the available funds, and a buy interval of 1-2 days to capture potential price movements."
+    "analysis": "The current NEUTRAL market regime and signals indicate that there are mixed and neutral indications, with the RSI at 50.2, a negative funding rate, and a low Fear & Greed index, suggesting a balanced market with no clear trend. This is a moderate moment to DCA, as the signals are not strongly aligned in any direction, but the DCA Entry Score of 80/100 suggests a relatively high likelihood of a profitable entry. Given the neutral market regime, I recommend using the Bitget GetAgent Playbook's \"Neutral Zone\" strategy, with a standard DCA allocation of 5% of the portfolio per entry."
   },
-  "model": "llama-3.1-8b-instant",
-  "provider": "Groq AI"
+  "model": "llama-3.1-8b-instant"
 }

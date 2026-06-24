@@ -1,127 +1,316 @@
 {
   "_meta": {
-    "captured": "2026-06-21T22:32:08.884Z",
+    "captured": "2026-06-24T09:47:29.554Z",
     "source": "BEACON live API — auto-logged by server.js",
-    "description": "Real response from radar endpoint"
+    "description": "Real response captured from radar endpoint"
   },
   "pairs": [
     {
       "symbol": "BTCUSDT",
       "display": "BTC/USDT",
-      "rsi": 49.6,
-      "fundingRate": 0.000003,
-      "oiValue": 32625.4615,
-      "volatility": 2.582,
-      "fearGreed": 23,
+      "currentPrice": 76512.97,
+      "rsi": 50.15,
+      "fundingRate": null,
+      "oiValue": 33103.7999,
+      "fearGreed": 17,
       "fearGreedLabel": "Extreme Fear",
+      "volatility": 2.626,
       "dcaScore": 83,
       "regime": {
         "name": "NEUTRAL",
         "label": "Neutral / Mixed Signals",
-        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
         "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
         "playbook": "DCA — Standard allocation."
       },
       "interval": {
         "days": 5,
         "label": "Every 5 days",
         "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
-      }
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "BTC/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 5 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
+        "generatedAt": "2026-06-24T09:47:28.648Z"
+      },
+      "timestamp": 1782294448648
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "display": "DOGE/USDT",
+      "currentPrice": 0.10205,
+      "rsi": 37.93,
+      "fundingRate": 0.000054,
+      "oiValue": 1029351179,
+      "fearGreed": 17,
+      "fearGreedLabel": "Extreme Fear",
+      "volatility": 3.078,
+      "dcaScore": 83,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "DOGE/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 5 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
+        "generatedAt": "2026-06-24T09:47:29.554Z"
+      },
+      "timestamp": 1782294449554
     },
     {
       "symbol": "BNBUSDT",
       "display": "BNB/USDT",
-      "rsi": 43.7,
+      "currentPrice": 660.3,
+      "rsi": 42.81,
       "fundingRate": 0.000062,
-      "oiValue": 82265.5,
-      "volatility": 3.125,
-      "fearGreed": 23,
+      "oiValue": 80786.99,
+      "fearGreed": 17,
       "fearGreedLabel": "Extreme Fear",
+      "volatility": 3.166,
       "dcaScore": 79,
       "regime": {
         "name": "NEUTRAL",
         "label": "Neutral / Mixed Signals",
-        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
         "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
         "playbook": "DCA — Standard allocation."
       },
       "interval": {
         "days": 5,
         "label": "Every 5 days",
         "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
-      }
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "BNB/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 5 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
+        "generatedAt": "2026-06-24T09:47:28.649Z"
+      },
+      "timestamp": 1782294448649
     },
     {
       "symbol": "XRPUSDT",
       "display": "XRP/USDT",
-      "rsi": 45.3,
-      "fundingRate": 0.000039,
-      "oiValue": 156479942,
-      "volatility": 3.445,
-      "fearGreed": 23,
+      "currentPrice": 1.3453,
+      "rsi": 46.41,
+      "fundingRate": 0.000093,
+      "oiValue": 156117639,
+      "fearGreed": 17,
       "fearGreedLabel": "Extreme Fear",
-      "dcaScore": 77,
+      "volatility": 3.475,
+      "dcaScore": 74,
       "regime": {
         "name": "NEUTRAL",
         "label": "Neutral / Mixed Signals",
-        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
         "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
         "playbook": "DCA — Standard allocation."
       },
       "interval": {
         "days": 5,
         "label": "Every 5 days",
         "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
-      }
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "XRP/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 5 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
+        "generatedAt": "2026-06-24T09:47:29.527Z"
+      },
+      "timestamp": 1782294449527
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "display": "AVAX/USDT",
+      "currentPrice": 9.294,
+      "rsi": 46.6,
+      "fundingRate": 0.00008,
+      "oiValue": 2489535.2,
+      "fearGreed": 17,
+      "fearGreedLabel": "Extreme Fear",
+      "volatility": 3.708,
+      "dcaScore": 72,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "AVAX/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 5 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
+        "generatedAt": "2026-06-24T09:47:29.549Z"
+      },
+      "timestamp": 1782294449549
+    },
+    {
+      "symbol": "LINKUSDT",
+      "display": "LINK/USDT",
+      "currentPrice": 9.482,
+      "rsi": 46.37,
+      "fundingRate": 0.000097,
+      "oiValue": 3239619,
+      "fearGreed": 17,
+      "fearGreedLabel": "Extreme Fear",
+      "volatility": 3.613,
+      "dcaScore": 72,
+      "regime": {
+        "name": "NEUTRAL",
+        "label": "Neutral / Mixed Signals",
+        "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
+        "playbook": "DCA — Standard allocation."
+      },
+      "interval": {
+        "days": 5,
+        "label": "Every 5 days",
+        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "LINK/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 5 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
+        "generatedAt": "2026-06-24T09:47:29.528Z"
+      },
+      "timestamp": 1782294449528
     },
     {
       "symbol": "ETHUSDT",
       "display": "ETH/USDT",
-      "rsi": 52,
-      "fundingRate": -0.000019,
-      "oiValue": 719089.5,
-      "volatility": 3.674,
-      "fearGreed": 23,
+      "currentPrice": 2087.79,
+      "rsi": 50.85,
+      "fundingRate": 0.000037,
+      "oiValue": 807877.36,
+      "fearGreed": 17,
       "fearGreedLabel": "Extreme Fear",
-      "dcaScore": 73,
+      "volatility": 3.744,
+      "dcaScore": 71,
       "regime": {
         "name": "NEUTRAL",
         "label": "Neutral / Mixed Signals",
-        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
         "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
         "playbook": "DCA — Standard allocation."
       },
       "interval": {
         "days": 5,
         "label": "Every 5 days",
         "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
-      }
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "ETH/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 5 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
+        "generatedAt": "2026-06-24T09:47:29.549Z"
+      },
+      "timestamp": 1782294449549
     },
     {
       "symbol": "SOLUSDT",
       "display": "SOL/USDT",
-      "rsi": 59.2,
-      "fundingRate": 0.000064,
-      "oiValue": 4352592.1,
-      "volatility": 3.925,
-      "fearGreed": 23,
+      "currentPrice": 84.49,
+      "rsi": 56.17,
+      "fundingRate": -0.000006,
+      "oiValue": 4347264.5,
+      "fearGreed": 17,
       "fearGreedLabel": "Extreme Fear",
-      "dcaScore": 64,
+      "volatility": 4.025,
+      "dcaScore": 68,
       "regime": {
         "name": "NEUTRAL",
         "label": "Neutral / Mixed Signals",
-        "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
         "tier": "neutral",
+        "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
         "playbook": "DCA — Standard allocation."
       },
       "interval": {
-        "days": 5,
-        "label": "Every 5 days",
-        "reason": "Elevated volatility — semi-frequent accumulation captures more of the swings."
-      }
+        "days": 3,
+        "label": "Every 3 days",
+        "reason": "High volatility — frequent small buys average extreme dips better than weekly."
+      },
+      "playbook": {
+        "strategy": "DCA",
+        "pair": "SOL/USDT",
+        "amountPerCycle": "$100 per cycle (full)",
+        "frequency": "Every 3 days",
+        "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+        "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+        "regime": "Neutral / Mixed Signals",
+        "confidence": "HIGH",
+        "recommendation": "DCA — Standard allocation.",
+        "optimizerReason": "High volatility — frequent small buys average extreme dips better than weekly.",
+        "generatedAt": "2026-06-24T09:47:29.539Z"
+      },
+      "timestamp": 1782294449539
     }
   ],
-  "fearGreed": 23,
+  "fearGreed": 17,
   "fearGreedLabel": "Extreme Fear",
-  "timestamp": 1782081128883
+  "timestamp": 1782294449554
 }

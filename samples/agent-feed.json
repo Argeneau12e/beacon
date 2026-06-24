@@ -1,0 +1,49 @@
+{
+  "_meta": {
+    "captured": "2026-06-24T09:47:44.857Z",
+    "source": "BEACON live API — auto-logged by server.js",
+    "description": "Real response captured from agent-feed endpoint"
+  },
+  "schema": "beacon-agent-feed-v1",
+  "description": "BEACON signal feed for Bitget AI agents and MCP-compatible tools",
+  "symbol": "BTCUSDT",
+  "timestamp": 1782294464855,
+  "validUntilMs": 1782308864855,
+  "action": "DCA_BUY",
+  "confidence": "HIGH",
+  "regime": "NEUTRAL",
+  "regimeLabel": "Neutral / Mixed Signals",
+  "playbook": "DCA",
+  "playbook_config": {
+    "strategy": "DCA",
+    "pair": "BTC/USDT",
+    "amountPerCycle": "$100 per cycle (full)",
+    "frequency": "Every 7 days",
+    "entryCondition": "RSI < 50 AND Fear & Greed < 55",
+    "pauseCondition": "RSI > 70 OR Fear & Greed > 70",
+    "regime": "Neutral / Mixed Signals",
+    "confidence": "HIGH",
+    "recommendation": "DCA — Standard allocation.",
+    "optimizerReason": "Strong entry conditions — weekly DCA maximises allocation into the favorable window.",
+    "generatedAt": "2026-06-24T09:47:44.855Z"
+  },
+  "signals": {
+    "rsi": 50,
+    "funding_rate": null,
+    "fear_greed": 50,
+    "fear_greed_label": "Neutral",
+    "volatility_pct": 2,
+    "open_interest": null,
+    "dca_entry_score": 71
+  },
+  "interval": {
+    "days": 7,
+    "label": "Every 7 days",
+    "reason": "Strong entry conditions — weekly DCA maximises allocation into the favorable window."
+  },
+  "reasoning": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution. Strong entry conditions — weekly DCA maximises allocation into the favorable window.",
+  "usage_example": {
+    "curl": "curl \"http://localhost:3000/api/agent-feed?symbol=BTCUSDT\"",
+    "mcp_note": "This endpoint returns a standardised action payload that any Bitget GetAgent or MCP-connected system can consume directly without parsing raw signal data."
+  }
+}

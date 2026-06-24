@@ -1,78 +1,56 @@
 {
   "_meta": {
-    "captured": "2026-06-21T22:33:25.914Z",
+    "captured": "2026-06-24T09:47:12.636Z",
     "source": "BEACON live API — auto-logged by server.js",
-    "description": "Real response from autopsy endpoint"
+    "description": "Real response captured from autopsy endpoint"
   },
   "symbol": "BTCUSDT",
   "accuracy": {
     "CAPITULATION": {
-      "count": 5,
+      "count": 8,
       "isBullish": true,
       "isBearish": false,
-      "hitRate7d": 80,
-      "hitRate14d": 60,
-      "avgReturn7d": 3.57,
-      "avgReturn14d": 2.2
+      "hitRate7d": 75,
+      "hitRate14d": 75,
+      "avgReturn7d": 3.17,
+      "avgReturn14d": 1.83
     },
     "ACCUMULATION": {
-      "count": 17,
+      "count": 16,
       "isBullish": true,
       "isBearish": false,
-      "hitRate7d": 5.9,
+      "hitRate7d": 6.3,
       "hitRate14d": 0,
-      "avgReturn7d": -8.1,
-      "avgReturn14d": -13.36
+      "avgReturn7d": -8.28,
+      "avgReturn14d": -14.17
     },
     "CONSOLIDATION": {
-      "count": 3,
+      "count": 2,
       "isBullish": false,
       "isBearish": false,
-      "hitRate7d": 66.7,
-      "hitRate14d": 33.3,
-      "avgReturn7d": 1.81,
-      "avgReturn14d": -1.07
+      "hitRate7d": 100,
+      "hitRate14d": 0,
+      "avgReturn7d": -0.63,
+      "avgReturn14d": -5.04
     },
     "NEUTRAL": {
-      "count": 36,
+      "count": 35,
       "isBullish": false,
       "isBearish": false,
-      "hitRate7d": 83.3,
-      "hitRate14d": 66.7,
-      "avgReturn7d": 0.94,
-      "avgReturn14d": 0.82
+      "hitRate7d": 80,
+      "hitRate14d": 65.7,
+      "avgReturn7d": 0.85,
+      "avgReturn14d": 0.58
     }
   },
   "signalHistory": [
-    {
-      "timestamp": 1775664000000,
-      "regime": "NEUTRAL",
-      "tier": "neutral",
-      "label": "Neutral Market",
-      "rsi": 57.8,
-      "fearGreed": 17,
-      "price": 72141.96,
-      "return7d": 3.54,
-      "return14d": 8.64
-    },
-    {
-      "timestamp": 1775750400000,
-      "regime": "NEUTRAL",
-      "tier": "neutral",
-      "label": "Neutral Market",
-      "rsi": 68.6,
-      "fearGreed": 14,
-      "price": 72449.12,
-      "return7d": 7.36,
-      "return14d": 7.72
-    },
     {
       "timestamp": 1775836800000,
       "regime": "NEUTRAL",
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 67.7,
-      "fearGreed": 16,
+      "fearGreed": 15,
       "price": 72856.92,
       "return7d": 4.54,
       "return14d": 6.14
@@ -83,7 +61,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 62.1,
-      "fearGreed": 15,
+      "fearGreed": 16,
       "price": 70898.55,
       "return7d": 6.98,
       "return14d": 10.08
@@ -94,7 +72,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 61.9,
-      "fearGreed": 16,
+      "fearGreed": 12,
       "price": 71866.39,
       "return7d": 5.35,
       "return14d": 6.87
@@ -105,7 +83,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 71,
-      "fearGreed": 12,
+      "fearGreed": 21,
       "price": 75307.8,
       "return7d": 0.7,
       "return14d": 1.01
@@ -116,7 +94,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 62.5,
-      "fearGreed": 21,
+      "fearGreed": 23,
       "price": 73843.96,
       "return7d": 7.35,
       "return14d": 2.82
@@ -138,7 +116,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 75.4,
-      "fearGreed": 23,
+      "fearGreed": 21,
       "price": 77779.99,
       "return7d": 0.34,
       "return14d": 0.84
@@ -149,7 +127,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 69.4,
-      "fearGreed": 21,
+      "fearGreed": 26,
       "price": 76165.16,
       "return7d": 1.53,
       "return14d": 3.06
@@ -160,7 +138,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 68.7,
-      "fearGreed": 26,
+      "fearGreed": 27,
       "price": 75846.23,
       "return7d": 2.9,
       "return14d": 3.72
@@ -171,7 +149,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 64.2,
-      "fearGreed": 27,
+      "fearGreed": 29,
       "price": 75710.01,
       "return7d": 1.44,
       "return14d": 5.7
@@ -182,7 +160,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 70.5,
-      "fearGreed": 29,
+      "fearGreed": 33,
       "price": 75836.46,
       "return7d": 0.3,
       "return14d": 7.51
@@ -193,7 +171,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 71,
-      "fearGreed": 33,
+      "fearGreed": 32,
       "price": 79271.6,
       "return7d": -4.22,
       "return14d": 3.07
@@ -204,7 +182,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 66.4,
-      "fearGreed": 32,
+      "fearGreed": 46,
       "price": 78377.95,
       "return7d": -2.44,
       "return14d": 1.95
@@ -215,7 +193,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 64.7,
-      "fearGreed": 46,
+      "fearGreed": 39,
       "price": 78042.95,
       "return7d": 0.5,
       "return14d": 2.7
@@ -226,7 +204,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 61.6,
-      "fearGreed": 39,
+      "fearGreed": 31,
       "price": 77331,
       "return7d": 1.5,
       "return14d": 4.13
@@ -237,7 +215,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 69.8,
-      "fearGreed": 31,
+      "fearGreed": 33,
       "price": 78048.41,
       "return7d": 0.79,
       "return14d": 4.31
@@ -248,18 +226,18 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 63.4,
-      "fearGreed": 33,
+      "fearGreed": 47,
       "price": 76801.17,
       "return7d": 4.2,
       "return14d": 6.05
     },
     {
       "timestamp": 1777305600000,
-      "regime": "CONSOLIDATION",
+      "regime": "NEUTRAL",
       "tier": "neutral",
-      "label": "Range Consolidation",
+      "label": "Neutral Market",
       "rsi": 52.4,
-      "fearGreed": 47,
+      "fearGreed": 33,
       "price": 76065.53,
       "return7d": 7.18,
       "return14d": 5.62
@@ -270,7 +248,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 57.3,
-      "fearGreed": 33,
+      "fearGreed": 26,
       "price": 75929.99,
       "return7d": 7.6,
       "return14d": 3.83
@@ -281,7 +259,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 56.3,
-      "fearGreed": 26,
+      "fearGreed": 29,
       "price": 76468.3,
       "return7d": 4.5,
       "return14d": 6.31
@@ -292,7 +270,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 52.5,
-      "fearGreed": 29,
+      "fearGreed": 26,
       "price": 78433.82,
       "return7d": 2.19,
       "return14d": 0.93
@@ -303,7 +281,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 60.3,
-      "fearGreed": 26,
+      "fearGreed": 39,
       "price": 78492.04,
       "return7d": 2.59,
       "return14d": -0.32
@@ -314,7 +292,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 62.6,
-      "fearGreed": 39,
+      "fearGreed": 47,
       "price": 78664.95,
       "return7d": 3.49,
       "return14d": -0.78
@@ -325,7 +303,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 67.3,
-      "fearGreed": 47,
+      "fearGreed": 40,
       "price": 80024.92,
       "return7d": 1.77,
       "return14d": -4.5
@@ -336,7 +314,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 70.6,
-      "fearGreed": 40,
+      "fearGreed": 50,
       "price": 81529.26,
       "return7d": -1.46,
       "return14d": -6.14
@@ -347,7 +325,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 61.5,
-      "fearGreed": 50,
+      "fearGreed": 46,
       "price": 81701.79,
       "return7d": -3.51,
       "return14d": -5.19
@@ -358,7 +336,7 @@
       "tier": "neutral",
       "label": "Range Consolidation",
       "rsi": 56.7,
-      "fearGreed": 46,
+      "fearGreed": 47,
       "price": 79909.98,
       "return7d": 1.73,
       "return14d": -3.32
@@ -369,7 +347,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 59.3,
-      "fearGreed": 47,
+      "fearGreed": 38,
       "price": 80150.85,
       "return7d": -1.23,
       "return14d": -4.18
@@ -391,7 +369,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 65,
-      "fearGreed": 38,
+      "fearGreed": 47,
       "price": 81410.43,
       "return7d": -4.12,
       "return14d": -6.19
@@ -402,7 +380,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 73.3,
-      "fearGreed": 47,
+      "fearGreed": 48,
       "price": 81444.65,
       "return7d": -6.17,
       "return14d": -4.7
@@ -413,7 +391,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 70.7,
-      "fearGreed": 48,
+      "fearGreed": 49,
       "price": 80340,
       "return7d": -4.75,
       "return14d": -4.76
@@ -424,7 +402,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 62.4,
-      "fearGreed": 49,
+      "fearGreed": 42,
       "price": 78835,
       "return7d": -1.74,
       "return14d": -4.45
@@ -435,29 +413,29 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 67.7,
-      "fearGreed": 42,
+      "fearGreed": 34,
       "price": 81290.01,
       "return7d": -4.96,
       "return14d": -10.28
     },
     {
       "timestamp": 1778774400000,
-      "regime": "NEUTRAL",
+      "regime": "CONSOLIDATION",
       "tier": "neutral",
-      "label": "Neutral Market",
+      "label": "Range Consolidation",
       "rsi": 52.6,
-      "fearGreed": 34,
+      "fearGreed": 43,
       "price": 79161.86,
       "return7d": -2.99,
       "return14d": -6.77
     },
     {
       "timestamp": 1778860800000,
-      "regime": "CONSOLIDATION",
+      "regime": "NEUTRAL",
       "tier": "neutral",
-      "label": "Range Consolidation",
+      "label": "Neutral Market",
       "rsi": 49.1,
-      "fearGreed": 43,
+      "fearGreed": 31,
       "price": 78238.04,
       "return7d": -3.48,
       "return14d": -5.51
@@ -468,7 +446,7 @@
       "tier": "neutral",
       "label": "Neutral Market",
       "rsi": 47.9,
-      "fearGreed": 31,
+      "fearGreed": 27,
       "price": 78052.78,
       "return7d": -2.15,
       "return14d": -5.63
@@ -479,7 +457,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 37.9,
-      "fearGreed": 27,
+      "fearGreed": 28,
       "price": 76420,
       "return7d": 1.57,
       "return14d": -6.93
@@ -490,7 +468,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 31.5,
-      "fearGreed": 28,
+      "fearGreed": 25,
       "price": 76526.95,
       "return7d": -0.02,
       "return14d": -12.05
@@ -501,7 +479,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 35.2,
-      "fearGreed": 25,
+      "fearGreed": 27,
       "price": 77459.99,
       "return7d": -2.75,
       "return14d": -14.7
@@ -512,7 +490,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 39.6,
-      "fearGreed": 27,
+      "fearGreed": 29,
       "price": 77256.3,
       "return7d": -5.6,
       "return14d": -17.29
@@ -523,7 +501,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 37,
-      "fearGreed": 29,
+      "fearGreed": 28,
       "price": 76798.49,
       "return7d": -3.9,
       "return14d": -21.3
@@ -545,7 +523,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 31.8,
-      "fearGreed": 28,
+      "fearGreed": 25,
       "price": 76371.39,
       "return7d": -3.55,
       "return14d": -18.69
@@ -556,7 +534,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 37.3,
-      "fearGreed": 25,
+      "fearGreed": 30,
       "price": 77620.01,
       "return7d": -8.37,
       "return14d": -17.84
@@ -567,7 +545,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 37.3,
-      "fearGreed": 30,
+      "fearGreed": 34,
       "price": 76512.97,
       "return7d": -12.03,
       "return14d": -20.11
@@ -578,7 +556,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 38.1,
-      "fearGreed": 34,
+      "fearGreed": 25,
       "price": 75328.72,
       "return7d": -12.28,
       "return14d": -16.85
@@ -589,7 +567,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 21.5,
-      "fearGreed": 25,
+      "fearGreed": 22,
       "price": 72930.01,
       "return7d": -12.39,
       "return14d": -13.95
@@ -600,7 +578,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 30,
-      "fearGreed": 22,
+      "fearGreed": 23,
       "price": 73804.43,
       "return7d": -18.11,
       "return14d": -13.84
@@ -622,7 +600,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 32.7,
-      "fearGreed": 23,
+      "fearGreed": 28,
       "price": 73657.36,
       "return7d": -15.7,
       "return14d": -13.08
@@ -633,7 +611,7 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 30.5,
-      "fearGreed": 28,
+      "fearGreed": 29,
       "price": 71125.51,
       "return7d": -10.33,
       "return14d": -5.39
@@ -644,18 +622,18 @@
       "tier": "bullish",
       "label": "Accumulation Zone",
       "rsi": 23.3,
-      "fearGreed": 29,
+      "fearGreed": 23,
       "price": 67305.86,
       "return7d": -9.18,
       "return14d": -2.14
     },
     {
       "timestamp": 1780416000000,
-      "regime": "ACCUMULATION",
+      "regime": "CAPITULATION",
       "tier": "bullish",
-      "label": "Accumulation Zone",
+      "label": "Market Capitulation",
       "rsi": 17.6,
-      "fearGreed": 23,
+      "fearGreed": 11,
       "price": 66075.5,
       "return7d": -5.21,
       "return14d": -0.5
@@ -666,7 +644,7 @@
       "tier": "bullish",
       "label": "Market Capitulation",
       "rsi": 15.8,
-      "fearGreed": 11,
+      "fearGreed": 12,
       "price": 63897.36,
       "return7d": -1.79,
       "return14d": -2.38
@@ -710,22 +688,44 @@
       "tier": "bullish",
       "label": "Market Capitulation",
       "rsi": 19.2,
-      "fearGreed": 12,
+      "fearGreed": 8,
       "price": 63774.91,
       "return7d": 5.52,
-      "return14d": -0.17
+      "return14d": 1.67
+    },
+    {
+      "timestamp": 1780934400000,
+      "regime": "CAPITULATION",
+      "tier": "bullish",
+      "label": "Market Capitulation",
+      "rsi": 18,
+      "fearGreed": 10,
+      "price": 61130,
+      "return7d": 7.75,
+      "return14d": 2.22
+    },
+    {
+      "timestamp": 1781020800000,
+      "regime": "CAPITULATION",
+      "tier": "bullish",
+      "label": "Market Capitulation",
+      "rsi": 23.9,
+      "fearGreed": 9,
+      "price": 62635.42,
+      "return7d": 4.97,
+      "return14d": 0.05
     }
   ],
   "summary": {
     "totalDaysAnalyzed": 61,
-    "bullishSignalsIssued": 22,
+    "bullishSignalsIssued": 24,
     "bearishSignalsIssued": 0,
-    "bullishAccuracy7d": 22.7,
+    "bullishAccuracy7d": 29.2,
     "bearishAccuracy7d": null,
-    "priceStart": 70829.85,
-    "priceEnd": 63667.07,
-    "priceChange": -10.11,
-    "note": "Historical funding rate unavailable from public API — regime classification uses RSI + Fear & Greed only."
+    "priceStart": 66127,
+    "priceEnd": 62665,
+    "priceChange": -5.24,
+    "methodology": "RSI + Fear & Greed only (historical funding rate unavailable from public API)"
   },
-  "timestamp": 1782081205914
+  "timestamp": 1782294432636
 }

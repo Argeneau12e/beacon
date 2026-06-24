@@ -1,22 +1,24 @@
 {
   "_meta": {
-    "captured": "2026-06-21T22:34:25.517Z",
+    "captured": "2026-06-24T09:59:06.251Z",
     "source": "BEACON live API — auto-logged by server.js",
-    "description": "Real response from signals endpoint"
+    "description": "Real response captured from signals endpoint"
   },
   "symbol": "BTCUSDT",
-  "rsi": 49.56,
-  "fundingRate": 0.000002,
-  "oiValue": 32646.9035,
-  "fearGreed": 23,
+  "display": "BTC/USDT",
+  "currentPrice": 76512.97,
+  "rsi": 50.23,
+  "fundingRate": 0.000066,
+  "oiValue": 33041.8599,
+  "fearGreed": 17,
   "fearGreedLabel": "Extreme Fear",
-  "volatility": 2.582,
-  "dcaScore": 84,
+  "volatility": 2.627,
+  "dcaScore": 80,
   "regime": {
     "name": "NEUTRAL",
     "label": "Neutral / Mixed Signals",
-    "desc": "Signals are not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor closely for a regime shift toward Accumulation or Distribution.",
     "tier": "neutral",
+    "desc": "Signals not strongly aligned in any direction. Standard DCA allocation is appropriate. Monitor for a regime shift toward Accumulation or Distribution.",
     "playbook": "DCA — Standard allocation."
   },
   "interval": {
@@ -35,7 +37,7 @@
     "confidence": "HIGH",
     "recommendation": "DCA — Standard allocation.",
     "optimizerReason": "Elevated volatility — semi-frequent accumulation captures more of the swings.",
-    "generatedAt": "2026-06-21T22:34:25.517Z"
+    "generatedAt": "2026-06-24T09:59:06.251Z"
   },
-  "timestamp": 1782081265517
+  "timestamp": 1782295146251
 }
